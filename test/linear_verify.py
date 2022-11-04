@@ -15,6 +15,7 @@ if __name__ == '__main__':
     out2 = l2(out)
     print(out2)
     out2.backward(torch.ones(2, 1))
+    print("output data: ", out2)
     print("x grad: ", x.grad)
     print("y grad: ", l.weight.grad)
     print("w grad: ", l2.weight.grad)

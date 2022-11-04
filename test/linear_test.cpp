@@ -38,19 +38,19 @@ int main() {
     FloatTensor input2[] = {z, w};
     FloatTensor output;
     output = Linear_f<float>::forward(input2, 2);
-
-    FloatTensor grad = FloatTensor(output);
-    for (int i = 0; i < z.nelement(); i++) {
-        grad.data[i] = 1.f;
-    }
-
-    output.backward(grad);
-
     printf("out data: [");
     for (int i = 0; i < output.nelement(); i++) {
         printf("%f ", output.data[i]);
     }
     printf("]\n");
+
+    FloatTensor grad;
+    grad.zeros_like(output);
+    for (int i = 0; i < z.nelement(); i++) {
+        grad.data[i] = 1.f;
+    }
+
+    output.backward(grad);
 
     printf("x grad: [");
     for (int i = 0; i < x.nelement(); i++) {
