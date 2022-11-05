@@ -14,8 +14,22 @@ int main() {
     printf("x element 0: %f\n", x.data[0]);
     printf("y element 0: %f\n", y.data[0]);
 
-    x.data[0] = 2.f;
+    // x.data[0] = 2.f;
+    for (int i = 0; i<2; i++) {
+        for (int j = 0; j<3; j++) {
+            int ind[] = {i, j};
+            x.index(ind) = j + i * 2;
+        }
+    }
 
     printf("x element 0: %f\n", x.data[0]);
     printf("y element 0: %f\n", y.data[0]);
+
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 3; j++) {
+            int ind[] = {i, j};
+            printf("%f ", x.index(ind));
+        }
+        printf("\n");
+    }
 }

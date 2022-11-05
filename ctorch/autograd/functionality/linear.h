@@ -1,5 +1,5 @@
-#ifndef _LINEARF_H_
-#define _LINEARF_H_
+#ifndef _LINEAR_H_
+#define _LINEAR_H_
 
 #include "../../tensor/tensor.h"
 #include "../../tensor/matrix.h"
@@ -7,12 +7,12 @@
 template <class T>
 class Linear_f: public Autograd<T> {
 public:
-    static Tensor_<T> forward(Tensor_<T>* input, int ninput);
-    static void backward(Tensor_<T> & grad, Tensor_<T>* children, int nchildren);
+    Tensor_<T> _forward(Tensor_<T>* input, int ninput);
+    void _backward(Tensor_<T> & grad, Tensor_<T>* children, int nchildren);
 };
 
 template <class T>
-Tensor_<T> Linear_f<T>::forward(Tensor_<T>* input, int ninput) {
+Tensor_<T> Linear_f<T>::_forward(Tensor_<T>* input, int ninput) {
     assert(ninput == 2);
 
     int batch_ch = input[0].size()[0];
@@ -25,18 +25,12 @@ Tensor_<T> Linear_f<T>::forward(Tensor_<T>* input, int ninput) {
 
     gemm<T>(CblasRowMajor, CblasNoTrans, CblasNoTrans, batch_ch, output_ch, input_ch, 
         1., input[0].data, input_ch, input[1].data, output_ch, 0., output.data, output_ch);
-
-    /* autograd: build the operator stream */
-    output.children = input;
-    output.nchildren = ninput;
-    output.grad_fn = Linear_f<T>::backward;
-    /* autograd */
     
     return output;
 }
 
 template <class T>
-void Linear_f<T>::backward(Tensor_<T> & grad, Tensor_<T>* children, int nchildren) {
+void Linear_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>* children, int nchildren) {
     assert(nchildren == 2);
 
     for (int i = 0; i<nchildren; i++) {

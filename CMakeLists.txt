@@ -25,3 +25,9 @@ target_link_libraries(tensor_test openblas pthread gfortran)
 
 add_executable(linear_test test/linear_test.cpp ${ctorch_srcs})
 target_link_libraries(linear_test openblas pthread gfortran)
+
+add_executable(conv2d_test test/conv2d_test.cpp ${ctorch_srcs})
+target_link_libraries(conv2d_test openblas pthread gfortran)
+
+add_executable(transpose_test test/transpose_test.cpp ${ctorch_srcs})
+target_link_libraries(transpose_test openblas pthread gfortran)

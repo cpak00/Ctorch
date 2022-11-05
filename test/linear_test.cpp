@@ -2,6 +2,8 @@
 #include "../ctorch/autograd/functionality/linear.h"
 
 int main() {
+    Linear_f<float> linear;
+
     int size_x[] = {2, 3};
     FloatTensor x(size_x, 2, true);
 
@@ -18,7 +20,7 @@ int main() {
 
     FloatTensor input[] = {x, y};
     FloatTensor z;
-    z = Linear_f<float>::forward(input, 2);
+    z = linear.forward(input, 2);
 
     printf("z data: [");
     for (int i = 0; i < z.nelement(); i++) {
@@ -37,7 +39,7 @@ int main() {
 
     FloatTensor input2[] = {z, w};
     FloatTensor output;
-    output = Linear_f<float>::forward(input2, 2);
+    output = linear.forward(input2, 2);
     printf("out data: [");
     for (int i = 0; i < output.nelement(); i++) {
         printf("%f ", output.data[i]);
@@ -52,27 +54,15 @@ int main() {
 
     output.backward(grad);
 
-    printf("x grad: [");
-    for (int i = 0; i < x.nelement(); i++) {
-        printf("%f ", x.grad[i]);
-    }
-    printf("]\n");
+    printf("x grad: \n");
+    x.pretty_print(x.grad);
 
-    printf("y grad: [");
-    for (int i = 0; i < y.nelement(); i++) {
-        printf("%f ", y.grad[i]);
-    }
-    printf("]\n");
+    printf("y grad: \n");
+    y.pretty_print(y.grad);
 
-    printf("z grad: [");
-    for (int i = 0; i < z.nelement(); i++) {
-        printf("%f ", z.grad[i]);
-    }
-    printf("]\n");
+    printf("z grad: \n");
+    z.pretty_print(z.grad);
 
-     printf("w grad: [");
-    for (int i = 0; i < w.nelement(); i++) {
-        printf("%f ", w.grad[i]);
-    }
-    printf("]\n");
+    printf("w grad: \n");
+    w.pretty_print(w.grad);
 }

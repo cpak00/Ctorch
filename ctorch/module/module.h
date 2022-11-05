@@ -6,9 +6,7 @@
 template <class T>
 class Module {
 protected:
-    Tensor_<T> forward_and_connect(Tensor_<T>* input, int ninput) {
-        
-    }
+    
 };
 
 #endif
