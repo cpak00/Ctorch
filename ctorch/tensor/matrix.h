@@ -70,4 +70,51 @@ void transpose(Tensor_<T> & data, Tensor_<T> & dest, int sel0, int sel1) {
 
 }
 
+template <typename T>
+void transpose(Tensor_<T> & data, Tensor_<T> & dest, int* sel, int nsel) {
+
+    int* size0 = data.size();
+    int* size1 = dest.size();
+    int nsize = data.ndim();
+
+    assert(nsize == nsel);
+
+    int nelement = 1;
+
+    for (int i=0; i<nsize; i++) {
+        size1[i] = size0[sel[i]];
+        // if (i == sel0) size1[i] = size0[sel1];
+        // else if (i == sel1) size1[i] = size0[sel0];
+        // else size1[i] = size0[i];
+        nelement *= size0[i];
+    }
+
+    dest.reshape(size1, nsize);
+
+    int* index0 = new int[nsize];
+    int* index1 = new int[nsize];
+
+    for (int i=0; i<nelement; i++) {
+        int _i = i;
+        for (int j=nsize-1; j>=0; j--) {
+            index0[j] = _i % size0[j];
+            index1[j] = index0[j];
+            _i /= size0[j];
+        }
+
+        for (int k=0; k<nsel; k++) {
+            index1[k] = index0[sel[k]];
+        }
+
+        // index1[sel0] = index0[sel1];
+        // index1[sel1] = index0[sel0];
+
+        dest.index(index1) = data.get(index0);
+    }
+
+    delete[] index1;
+    delete[] index0;
+
+}
+
 #endif

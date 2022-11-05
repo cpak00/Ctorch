@@ -41,6 +41,7 @@ public:
     int nelement();
     int* size();
     void reshape(int* new_size, int nsize);
+    Tensor_<T> rotate180();
 
     T& index(int* ind);
     T& index(int ind);
@@ -79,6 +80,8 @@ Tensor_<T>::Tensor_(int* size, int dim, bool requires_grad): data(NULL), grad(NU
     this->data = new T[this->_nelement];
     if (this->requires_grad) {
         this->grad = new T[this->_nelement];
+    } else {
+        this->grad = NULL;
     }
 }
 
@@ -102,13 +105,14 @@ void Tensor_<T>::clone(Tensor_<T>& tensor)  {
     for (int i=0; i<this->_nelement; i++) {
         this->data[i] = tensor.data[i];
     }
-
+    
     if (tensor.grad != NULL) {
         this->grad = new T[this->_nelement];
         for (int i=0; i<this->_nelement; i++) {
             this->grad[i] = tensor.grad[i];
         }
     }
+
 }
 
 template<class T>
@@ -190,6 +194,13 @@ int* Tensor_<T>::size() {
 
 template<class T>
 void Tensor_<T>::reshape(int* new_size, int nsize) {
+    int ele = 1;
+    for (int i=0; i<nsize; i++) {
+        ele *= new_size[i];
+    }
+    assert(this->nelement() == ele);
+
+
     this->_ndim = nsize;
     this->_size = new int[nsize];
     for (int i=0; i<nsize; i++) {
@@ -236,6 +247,39 @@ template<class T>
 T Tensor_<T>::get(int ind) {
     if (ind < 0 || ind >= this->nelement()) return this->padding;
     return this->data[ind];
+}
+
+template<class T>
+Tensor_<T> Tensor_<T>::rotate180() {
+    int* new_size = new int[this->ndim()];
+    for (int i=0; i<this->ndim()-2; i++) new_size[i] = this->size()[i];
+    new_size[this->ndim()-1] = this->size()[this->ndim()-2];
+    new_size[this->ndim()-2] = this->size()[this->ndim()-1];
+
+    int* index0 = new int[this->ndim()];
+    int* index1 = new int[this->ndim()];
+
+    Tensor_<T> output(new_size, this->ndim());
+
+    for(int i=0; i<nelement(); i++) {
+        int _i = i;
+        for (int j=this->ndim()-1; j>=0; j--) {
+            index0[j] = _i % this->size()[j];
+            index1[j] = index0[j];
+            _i /= this->size()[j];
+        }
+        index1[ndim()-2] = this->size()[ndim()-2] - index0[ndim()-2] - 1;
+        index1[ndim()-1] = this->size()[ndim()-1] -index0[ndim()-1] - 1;
+
+        output.index(index1) = this->get(index0);
+    }
+
+
+    delete[] index0;
+    delete[] index1;
+    delete[] new_size;
+
+    return output;
 }
 
 

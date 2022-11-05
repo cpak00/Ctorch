@@ -1,8 +1,8 @@
 import torch
 
 if __name__ == '__main__':
-    x = torch.tensor([float(i) for i in range(2*2*2)], requires_grad=True).reshape(2, 1, 2, 2)
-    y = torch.tensor([float(i) for i in range(2*3*3)]).reshape(2, 1, 3, 3)
+    x = torch.tensor([float(i) for i in range(2*3*4*4)], requires_grad=True).reshape(2, 3, 4, 4)
+    y = torch.tensor([float(i) for i in range(5*3*3*3)]).reshape(5, 3, 3, 3)
 
     x.retain_grad()
 
@@ -15,8 +15,14 @@ if __name__ == '__main__':
     output = m(x)
     print(output)
 
-    output.backward(torch.ones_like(output))
+    grad = torch.ones_like(output)
 
-    print(x.grad)
+    # grad[0][0][1][0] = 1
+
+    print("grad", grad)
+
+    output.backward(grad)
 
     print(m.weight.grad)
+
+    print(x.grad)
