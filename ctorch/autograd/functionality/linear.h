@@ -6,7 +6,7 @@
 
 template <class T>
 class Linear_f: public Autograd<T> {
-public:
+protected:
     Tensor_<T> _forward(Tensor_<T>* input, int ninput);
     void _backward(Tensor_<T> & grad, Tensor_<T>* children, int nchildren);
 };

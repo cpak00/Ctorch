@@ -42,6 +42,8 @@ public:
     int* size();
     void reshape(int* new_size, int nsize);
     Tensor_<T> rotate180();
+    void get_index(int n, int* index);
+    int get_index(int* index);
 
     T& index(int* ind);
     T& index(int ind);
@@ -87,6 +89,7 @@ Tensor_<T>::Tensor_(int* size, int dim, bool requires_grad): data(NULL), grad(NU
 
 template<class T>
 void Tensor_<T>::clone(Tensor_<T>& tensor)  {
+    this->clear();
     this->_ndim = tensor._ndim;
     this->_size = new int[this->_ndim];
     this->_nelement = 1;
@@ -117,6 +120,7 @@ void Tensor_<T>::clone(Tensor_<T>& tensor)  {
 
 template<class T>
 void Tensor_<T>::zeros_like(Tensor_<T>& tensor)  {
+    this->clear();
     this->_ndim = tensor._ndim;
     this->_size = new int[this->_ndim];
     this->_nelement = 1;
@@ -280,6 +284,28 @@ Tensor_<T> Tensor_<T>::rotate180() {
     delete[] new_size;
 
     return output;
+}
+
+template<class T>
+void Tensor_<T>::get_index(int n, int* index) {
+    for (int j=this->ndim()-1; j>=0; j--) {
+        index[j] = n % this->size()[j];
+        n /= this->size()[j];
+    }
+}
+
+template<class T>
+int Tensor_<T>::get_index(int* ind) {
+     int sel = 0;
+    int size = 1;
+    
+    for (int i = this->ndim() - 1; i >= 0; i--) {
+        if (ind[i] < 0 || ind[i] >= this->size()[i]) return this->padding;
+        sel += ind[i] * size;
+        size *= this->size()[i];
+    }
+
+    return sel;
 }
 
 

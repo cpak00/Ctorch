@@ -7,7 +7,7 @@
 
 template <class T>
 class Conv2d_f: public Autograd<T> {
-private:
+protected:
     int kern_size;
     int stride;
     int padding;
@@ -22,10 +22,11 @@ private:
 
     Tensor_<T> input_col;
 
-public:
-    Conv2d_f(int kern_size, int stride, int padding);
     Tensor_<T> _forward(Tensor_<T>* input, int ninput);
     void _backward(Tensor_<T> & grad, Tensor_<T>* children, int nchildren);
+
+public:
+    Conv2d_f(int kern_size, int stride, int padding);
 };
 
 template<class T>
@@ -110,13 +111,11 @@ void Conv2d_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>* children, int nchildr
 
     int _size[] = {batch_size, height_col, width_col, expand_size};
     x_grad_column_tran.reshape(_size, 4);
-    x_grad_column_tran.pretty_print();
 
     Tensor_<T> x_grad;
     x_grad.zeros_like(children[0]);
 
     col2im(x_grad_column_tran, x_grad, kern_size, stride, padding);
-    x_grad.pretty_print();
 
     for (int i=0; i<children[0].nelement(); i++) children[0].grad[i] = x_grad.data[i];
     

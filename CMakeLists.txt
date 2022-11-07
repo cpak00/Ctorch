@@ -13,6 +13,9 @@ set(EXECUTABLE_OUTPUT_PATH bin)
 
 file(GLOB_RECURSE ctorch_srcs src/*.cpp)
 
+find_package(OpenCV REQUIRED)
+message(STATUS "Opencv lib" ${OpenCV_LIBS})
+
 set(ENV{OPENBLAS_NUM_THREAD} 8)
 set(ENV{NUM_THREADS} 8)
 set(ENV{USE_OPENMP} 1)
@@ -31,3 +34,12 @@ target_link_libraries(conv2d_test openblas pthread gfortran)
 
 add_executable(transpose_test test/transpose_test.cpp ${ctorch_srcs})
 target_link_libraries(transpose_test openblas pthread gfortran)
+
+add_executable(pooling_test test/pooling_test.cpp ${ctorch_srcs})
+target_link_libraries(pooling_test openblas pthread gfortran)
+
+add_executable(loss_test test/loss_test.cpp ${ctorch_srcs})
+target_link_libraries(loss_test openblas pthread gfortran)
+
+add_executable(opencv_test test/opencv_test.cpp ${ctorch_srcs})
+target_link_libraries(opencv_test openblas pthread gfortran ${OpenCV_LIBS})

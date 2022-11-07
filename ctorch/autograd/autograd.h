@@ -11,6 +11,7 @@ public:
     Tensor_<T> forward(Tensor_<T>* input, int ninput);
     void backward(Tensor_<T> & grad, Tensor_<T>* children, int nchildren);
 
+protected:
     virtual Tensor_<T> _forward(Tensor_<T>* input, int ninput) = 0;
     virtual void _backward(Tensor_<T> & grad, Tensor_<T>* children, int nchildren) = 0;
 };
