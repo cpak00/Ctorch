@@ -54,6 +54,8 @@ public:
     void backward(Tensor_<T> & grad);
 
     void clear();
+
+    void cutoff(int batch) {assert(_ndim >= 1), _size[0] = batch;};
 };
 
 typedef Tensor_<float> FloatTensor;
