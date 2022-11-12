@@ -5,8 +5,10 @@
 
 template <class T>
 class Module {
-protected:
-    
+public:
+    Tensor_<T> weight;
+    Tensor_<T> bias;
+    Tensor_<T> & forward(Tensor_<T> & input);
 };
 
 #endif

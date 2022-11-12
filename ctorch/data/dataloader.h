@@ -30,7 +30,6 @@ DataLoader<T>::DataLoader(Dataset<T>& dataset, int batch_size) {
 
 template<class T>
 bool DataLoader<T>::next(Tensor_<T> & data, Tensor_<T> & label) {
-    data.clear(); label.clear();
 
     int* tensor_size = new int[nsize + 1];
     tensor_size[0] = batch_size;
@@ -57,8 +56,6 @@ bool DataLoader<T>::next(Tensor_<T> & data, Tensor_<T> & label) {
             label.index(ind * clazz.nelement() + i) = clazz.get(i);
         }
 
-        clazz.clear();
-        file.clear();
         ind ++;
     }
     

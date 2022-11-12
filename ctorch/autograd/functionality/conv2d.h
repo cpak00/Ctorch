@@ -22,59 +22,76 @@ protected:
 
     Tensor_<T> input_col;
 
-    Tensor_<T> _forward(Tensor_<T>* input, int ninput);
-    void _backward(Tensor_<T> & grad, Tensor_<T>* children, int nchildren);
+    Tensor_<T> _forward(Tensor_<T>** input, int ninput);
+    void _backward(Tensor_<T> & grad, Tensor_<T>** children, int nchildren);
 
 public:
     Conv2d_f(int kern_size, int stride, int padding);
 };
 
 template<class T>
-Conv2d_f<T>::Conv2d_f(int kern_size, int stride, int padding):kern_size(kern_size), stride(stride), padding(padding) {};
+Conv2d_f<T>::Conv2d_f(int kern_size, int stride, int padding): kern_size(kern_size), stride(stride), padding(padding) {};
 
 template <class T>
-Tensor_<T> Conv2d_f<T>::_forward(Tensor_<T>* input, int ninput) {
-    assert(ninput == 2);
-    assert(input[0].ndim() == 4 && input[1].ndim() == 4);
+Tensor_<T> Conv2d_f<T>::_forward(Tensor_<T>** input, int ninput) {
+    assert(ninput == 2 || ninput == 3);
+    assert(input[0]->ndim() == 4 && input[1]->ndim() == 4);
 
-    input_col = im2col(input[0], this->kern_size, this->stride, this->padding);
-    Tensor_<T> weights = input[1];
+    input_col = im2col(*input[0], this->kern_size, this->stride, this->padding);
+    Tensor_<T>* weights = input[1];
 
-    output_ch = input[1].size()[0];
-    int input_ch = input[1].size()[1];
-    int k_size = input[1].size()[2];
+    output_ch = input[1]->size()[0];
+    int input_ch = input[1]->size()[1];
+    int k_size = input[1]->size()[2];
 
     batch_size = input_col.size()[0];
     expand_size = input_col.size()[3];
     act_size = input_col.size()[1] * input_col.size()[2];
 
-    int act_h = input[0].size()[2];
-    int act_w = input[0].size()[3];
+    int act_h = input[0]->size()[2];
+    int act_w = input[0]->size()[3];
 
     height_col = (act_h + 2*padding - k_size) / stride + 1;
     width_col = (act_w + 2*padding - k_size) / stride + 1;
 
-    int output_size[] = {batch_size, output_ch, input_col.size()[1], input_col.size()[2]};
-    Tensor_<T> output(output_size, 4, input[0].requires_grad);
+    int output_t_size[] = {output_ch, batch_size, input_col.size()[1], input_col.size()[2]};
+    Tensor_<T> output_t(output_t_size, 4, input[0]->requires_grad);
 
-    Tensor_<T> output_t;
-    output_t.zeros_like(output);
-    
-    gemm<T>(CblasRowMajor, CblasNoTrans, CblasTrans, output_ch, batch_size * act_size, expand_size, 1., weights.data, expand_size, input_col.data, expand_size, 0., output_t.data, batch_size * act_size);
+    for (int i=0; i<output_t.nelement(); i++) output_t.index(i) = 0;
+
+    if (ninput == 3) {
+        // bias
+        for (int i=0; i<output_t.nelement(); i++) {
+            // int size[4];
+            // output_t.get_index(i, size);
+            output_t.index(i) += input[2]->get(i / (batch_size * input_col.size()[1] * input_col.size()[2]));
+        }
+    }
+
+    gemm<T>(CblasRowMajor, CblasNoTrans, CblasTrans, output_ch, batch_size * act_size, expand_size, 1., weights->data, expand_size, input_col.data, expand_size, 1., output_t.data, batch_size * act_size);
     // gemm<T>(CblasRowMajor, CblasNoTrans, CblasTrans, output_ch, batch_size * act_size, expand_size, 1., input_col.data, expand_size, weights.data, expand_size, 0., output_t.data, batch_size * act_size);
 
+    Tensor_<T> output;
+    output.zeros_like(output_t);
     transpose(output_t, output, 0, 1);
 
-    output.reshape(output_size, 4);
-
-    output_t.clear();
+    // output.reshape(output_size, 4);
 
     return output;
 }   
 
 template <class T>
-void Conv2d_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>* children, int nchildren) {
-    assert(nchildren == 2);
+void Conv2d_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int nchildren) {
+    assert(nchildren == 2 || nchildren == 3);
+
+    if (nchildren == 3) {
+        // bias grad
+        for (int i=0; i<grad.nelement(); i++) {
+            int bias_ind[4];
+            grad.get_index(i, bias_ind);
+            children[2]->grad[bias_ind[1]] += grad.get(i);
+        }
+    }
 
     Tensor_<T> grad_tran;
     grad_tran.zeros_like(grad);
@@ -82,8 +99,8 @@ void Conv2d_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>* children, int nchildr
     transpose(grad, grad_tran, trans_grad, 4);
 
     for (int i = 0; i<nchildren; i++) {
-        if (children[i].grad == NULL) {
-            children[i].grad = new T[children[i].nelement()];
+        if (children[i]->grad == NULL) {
+            children[i]->grad = new T[children[i]->nelement()];
         }
     }
 
@@ -98,8 +115,8 @@ void Conv2d_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>* children, int nchildr
     x_hat.zeros_like(input_col);
     transpose(input_col, x_hat, 0, 1);
 
-    gemm<float>(CblasRowMajor, CblasNoTrans, CblasNoTrans, output_ch, expand_size, batch_size * act_size, 1., grad_tran.data, batch_size * act_size, x_hat.data, expand_size, 0., children[1].grad, expand_size);
-    gemm<float>(CblasRowMajor, CblasTrans, CblasNoTrans, expand_size, act_size * batch_size, output_ch, 1., children[1].data, expand_size, grad_tran.data, act_size * batch_size, 0., x_grad_column.data, act_size * batch_size);
+    gemm<float>(CblasRowMajor, CblasNoTrans, CblasNoTrans, output_ch, expand_size, batch_size * act_size, 1., grad_tran.data, batch_size * act_size, x_hat.data, expand_size, 0., children[1]->grad, expand_size);
+    gemm<float>(CblasRowMajor, CblasTrans, CblasNoTrans, expand_size, act_size * batch_size, output_ch, 1., children[1]->data, expand_size, grad_tran.data, act_size * batch_size, 0., x_grad_column.data, act_size * batch_size);
 
     int x_grad_column_size[] = {expand_size, input_col.size()[1], batch_size};
     x_grad_column.reshape(x_grad_column_size, 3);
@@ -117,13 +134,8 @@ void Conv2d_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>* children, int nchildr
 
     col2im(x_grad_column_tran, x_grad, kern_size, stride, padding);
 
-    for (int i=0; i<children[0].nelement(); i++) children[0].grad[i] = x_grad.data[i];
+    for (int i=0; i<children[0]->nelement(); i++) children[0]->grad[i] = x_grad.data[i];
     
-    x_grad.clear();
-    x_hat.clear();
-    x_grad_column.clear();
-    x_grad_column_tran.clear();
-    grad_tran.clear();
 }
 
 #endif

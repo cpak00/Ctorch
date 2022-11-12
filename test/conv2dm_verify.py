@@ -6,8 +6,11 @@ if __name__ == '__main__':
 
     x.retain_grad()
 
-    m = torch.nn.Conv2d(3, 5, 3, 1, 1, bias=False)
+    m = torch.nn.Conv2d(3, 5, 3, 1, 1, bias=True)
     m.weight.data = y.clone()
+    for i in range(m.bias.size()[0]):
+        m.bias.data[i] = i
+    
 
     print(x.data)
     print(m.weight.data)
@@ -17,10 +20,12 @@ if __name__ == '__main__':
 
     grad = torch.ones_like(output)
 
-    grad[0][0][1][0] = 1
+    grad[0][0][1][0] = 1.
 
     output.backward(grad)
 
     print(m.weight.grad)
 
     print(x.grad)
+
+    print(m.bias.grad)

@@ -14,10 +14,10 @@ int main() {
         x.data[i] = rand() % 10 - 5;
     }
 
-    FloatTensor input[] = {x};
+    FloatTensor* input[] = {&x};
     FloatTensor output1 = pool.forward(input, 1);
 
-    FloatTensor input2[] = {output1};
+    FloatTensor* input2[] = {&output1};
     FloatTensor output2 = relu.forward(input2, 1);
 
     x.pretty_print();

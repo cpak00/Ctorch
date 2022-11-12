@@ -24,21 +24,28 @@ public:
     T padding;
     
     bool requires_grad;
-    Tensor_<T>* children;
+    Tensor_<T>** children;
     int nchildren;
     // void (*grad_fn)(Tensor_<T> & grad, Tensor_<T>* children, int nchildren);
     Autograd<T>* grad_fn;
 public:
     Tensor_(bool requires_grad = true);
     Tensor_(int* size, int dim, bool requires_grad = true);
-    void clone(Tensor_<T> & tensor);
-    void zeros_like(Tensor_<T> & tensor);
+    Tensor_(const Tensor_<T> & other);
+    Tensor_(Tensor_<T> && other);
+    Tensor_<T>& operator=(Tensor_<T>& other);
+    Tensor_<T>& operator=(Tensor_<T>&& other);
+    
+    void clone(const Tensor_<T> & tensor);
+    void zeros_like(const Tensor_<T> & tensor);
+    void clone(const Tensor_<T> * tensor);
+    void zeros_like(const Tensor_<T> * tensor);
     // Tensor_(Tensor_<T>&& other);
     // Tensor_<T>& operator=(Tensor_<T>&& other);
     ~Tensor_();
 
-    int ndim();
-    int nelement();
+    int ndim() const;
+    int nelement() const;
     int* size();
     void reshape(int* new_size, int nsize);
     Tensor_<T> rotate180();
@@ -53,8 +60,6 @@ public:
 
     void backward(Tensor_<T> & grad);
 
-    void clear();
-
     void cutoff(int batch) {assert(_ndim >= 1), _size[0] = batch;};
 };
 
@@ -67,6 +72,8 @@ template<class T>
 Tensor_<T>::Tensor_(bool requires_grad): _size(NULL), data(NULL), grad(NULL), grad_fn(NULL), children(NULL), padding(0) {
     this->requires_grad = requires_grad;
     this->_nelement = 0;
+    this->_ndim = 0;
+    this->nchildren = 0;
 }
 
 template<class T>
@@ -74,6 +81,7 @@ Tensor_<T>::Tensor_(int* size, int dim, bool requires_grad): data(NULL), grad(NU
     this->_ndim = dim;
     this->_size = new int[this->_ndim];
     this->_nelement = 1;
+    this->nchildren = 0;
     for (int i=0; i<dim; i++) {
         this->_size[i] = size[i];
         this->_nelement *= size[i];
@@ -84,45 +92,72 @@ Tensor_<T>::Tensor_(int* size, int dim, bool requires_grad): data(NULL), grad(NU
     this->data = new T[this->_nelement];
     if (this->requires_grad) {
         this->grad = new T[this->_nelement];
+        for (int i=0; i<this->_nelement; i++) this->grad[i] = 0.f;
     } else {
         this->grad = NULL;
     }
 }
 
 template<class T>
-void Tensor_<T>::clone(Tensor_<T>& tensor)  {
-    this->clear();
-    this->_ndim = tensor._ndim;
-    this->_size = new int[this->_ndim];
-    this->_nelement = 1;
-    for (int i=0; i<this->_ndim; i++) {
-        this->_size[i] = tensor._size[i];
-        this->_nelement *= this->_size[i];
-    }
-    this->requires_grad = tensor.requires_grad;
-    this->padding = tensor.padding;
-    // this->grad_fn = tensor.grad_fn;
-    // this->children = tensor.children;
-    // this->nchildren = tensor.nchildren;
+Tensor_<T>::Tensor_(const Tensor_<T>& other) {
+    this->clone(other);
+}
 
-    // copy for data
-    this->data = new T[this->_nelement];
-    for (int i=0; i<this->_nelement; i++) {
-        this->data[i] = tensor.data[i];
+template<class T>
+Tensor_<T>::Tensor_(Tensor_<T> && other) {
+    this->clone(other);
+}
+
+template<class T>
+Tensor_<T>& Tensor_<T>::operator=(Tensor_<T>& other) {
+    if (this == &other) {
+        return *this;
     }
+    this->clone(other);
+    return *this;
+}
+
+template<class T>
+Tensor_<T>& Tensor_<T>::operator=(Tensor_<T>&& other) {
+    if (this == &other) {
+        return *this;
+    }
+    this->clone(other);
+
+    return *this;
+}
+
+template<class T>
+void Tensor_<T>::clone(const Tensor_<T>& other)  {
+
+    this->_ndim = other._ndim;
+    this->_nelement = other._nelement;
+    this->requires_grad = other.requires_grad;
+    this->grad_fn = other.grad_fn;
+    this->nchildren = other.nchildren;
     
-    if (tensor.grad != NULL) {
-        this->grad = new T[this->_nelement];
-        for (int i=0; i<this->_nelement; i++) {
-            this->grad[i] = tensor.grad[i];
-        }
+    this->children = new Tensor_<T>*[other.nchildren];
+    for (int i=0; i<other.nchildren; i++) this->children[i] = other.children[i];
+    this->_size = new int[other.ndim()];
+    for (int i=0; i<other.ndim(); i++) this->_size[i] = other._size[i];
+    this->data = new T[other.nelement()];
+    for (int i=0; i<other.nelement(); i++) this->data[i] = other.data[i];
+    if (other.grad != NULL) {
+        this->grad = new T[other.nelement()];
+        for (int i=0; i<other.nelement(); i++) this->grad[i] = other.grad[i];
     }
+}
+
+template<class T>
+void Tensor_<T>::clone(const Tensor_<T>* other)  {
+
+    this->clone(*other);
 
 }
 
 template<class T>
-void Tensor_<T>::zeros_like(Tensor_<T>& tensor)  {
-    this->clear();
+void Tensor_<T>::zeros_like(const Tensor_<T>& tensor)  {
+
     this->_ndim = tensor._ndim;
     this->_size = new int[this->_ndim];
     this->_nelement = 1;
@@ -136,60 +171,33 @@ void Tensor_<T>::zeros_like(Tensor_<T>& tensor)  {
     for (int i=0; i<this->_nelement; i++) {
         this->data[i] = 0;
     }
-}
-
-/*
-template<class T>
-Tensor_<T>::Tensor_(Tensor_<T>&& other) {
-    this->_ndim = other._ndim;
-    this->_nelement = other._nelement;
-    this->requires_grad = other.requires_grad;
-    this->grad_fn = other.grad_fn;
-    this->children = other.children;
-    this->nchildren = other.nchildren;
-    std::swap(_size, other._size);
-    std::swap(data, other.data);
-    std::swap(grad, other.grad);
-}
-
-template<class T>
-Tensor_<T>& Tensor_<T>::operator=(Tensor_<T>&& other) {
-    if (this == &other) {
-        return *this;
+    this->grad = new T[this->_nelement];
+    for (int i=0; i<this->_nelement; i++) {
+        this->grad[i] = 0;
     }
-    this->_ndim = other._ndim;
-    this->_nelement = other._nelement;
-    this->requires_grad = other.requires_grad;
-    this->grad_fn = other.grad_fn;
-    this->children = other.children;
-    this->nchildren = other.nchildren;
-    std::swap(_size, other._size);
-    std::swap(data, other.data);
-    std::swap(grad, other.grad);
-    return *this;
 }
-*/
+
+template<class T>
+void Tensor_<T>::zeros_like(const Tensor_<T> * tensor)  {
+
+    this->zeros_like(*tensor);
+}
+
 template<class T>
 Tensor_<T>::~Tensor_() {
-    // delete_s(this->_size);
-    // delete_s(this->data);
-    // delete_s(this->grad);
-}
-
-template<class T>
-void Tensor_<T>::clear() {
     delete_s(this->_size);
     delete_s(this->data);
     delete_s(this->grad);
+    delete_s(this->children);
 }
 
 template<class T>
-int Tensor_<T>::ndim() {
+int Tensor_<T>::ndim() const {
     return this->_ndim;
 }
 
 template<class T>
-int Tensor_<T>::nelement() {
+int Tensor_<T>::nelement() const {
     return this->_nelement;
 }
 
@@ -364,13 +372,11 @@ void Tensor_<T>::backward(Tensor_<T> & grad) {
         grad_fn->backward(grad, this->children, this->nchildren);
     }
     for (int i = 0; i < this->nchildren; i++) {
-        if (this->children[i].grad_fn != NULL) {
-            Tensor_<T> new_grad;
-            new_grad.clone(this->children[i]);
+        if (this->children[i]->grad_fn != NULL) {
+            Tensor_<T> new_grad = Tensor_<T>(*(this->children[i]));
             new_grad.data = new_grad.grad;
             new_grad.grad = NULL;
-            this->children[i].backward(new_grad);
-            new_grad.clear();
+            this->children[i]->backward(new_grad);
         }
     }
 }

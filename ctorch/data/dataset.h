@@ -104,8 +104,6 @@ bool ImageFolder<T>::next(Tensor_<T> & data, Tensor_<T> & label) {
         if (file_ptr[classes_ptr] >= n_files[classes_ptr]) {
             classes_ptr++;
         } else {
-            data.clear(); label.clear();
-
             string file = string(datapath) + "/" + classes[classes_ptr] + "/" +filenames[classes_ptr][file_ptr[classes_ptr]];
             data = Tensor_<T>(size, nsize);
             int label_size[] = {1};

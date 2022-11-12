@@ -24,7 +24,7 @@ int main() {
     label.data[0] = 2;
     label.data[1] = 1;
 
-    FloatTensor input[] = {x, label};
+    FloatTensor* input[2] = {&x, &label};
     FloatTensor l = softmax.forward(input, 2);
 
     printf("loss: %f\n", l.data[0]);
