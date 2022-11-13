@@ -86,7 +86,7 @@ int main() {
     bool is_next = true;
 
     for (int i = 0; i < epoch_size; i++) {
-        printf("Epoch %3d:\n", i);
+        float sum_loss = 0.f; int step = 0;
         while (is_next) {
             FloatTensor data;
             FloatTensor label;
@@ -96,7 +96,9 @@ int main() {
             FloatTensor* criterion_input[] = {&out, &label};
             FloatTensor loss = criterion.forward(criterion_input, 2);
 
-            printf("loss: %f\n", loss.data[0]);
+            sum_loss += loss.data[0];
+            step++;
+            printf("Epoch %3d.%3d loss: %2.4f (avg: %2.2f)\n", i, step, loss.data[0], sum_loss / step);
 
             optimizer.zero_grad();
             FloatTensor grad;
@@ -104,6 +106,7 @@ int main() {
             optimizer.step();
             // out.pretty_print();
         }
+        printf("Epoch %3d Loss: %2.2f\n", i, sum_loss / step);
     }
 }
 

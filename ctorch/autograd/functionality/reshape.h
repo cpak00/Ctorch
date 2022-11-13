@@ -29,7 +29,7 @@ template <class T>
 Tensor_<T> Reshape_f<T>::_forward(Tensor_<T>** input, int ninput) {
     assert (ninput == 1);
 
-    int* size_new = new int[nsize_bac];
+    int* size_new = new int[nsize_bac]; // safely deleted
 
     for (int i=0; i<nsize_bac; i++) {
         if (size_bac[i] < 0) {
@@ -45,12 +45,12 @@ Tensor_<T> Reshape_f<T>::_forward(Tensor_<T>** input, int ninput) {
 
     nsize_for = output.ndim();
     delete_s(size_for);
-    size_for = new int[nsize_for];
+    size_for = new int[nsize_for]; // safely deleted
     for (int i=0; i<nsize_for; i++) size_for[i] = output.size()[i];
 
     output.reshape(size_new, nsize_bac);
 
-    delete[] size_new;
+    delete_s(size_new);
     return output;
 }
 

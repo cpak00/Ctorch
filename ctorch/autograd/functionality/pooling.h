@@ -33,12 +33,12 @@ Tensor_<T> MaxPooling_f<T>::_forward(Tensor_<T>** input, int ninput) {
 
     Tensor_<T> output(new_size, input[0]->ndim());
 
-    int* index = new int[input[0]->ndim()];
+    int* index = new int[input[0]->ndim()]; // safely deleted
     for (int n=0; n<output.nelement(); n++) {
         output.get_index(n, index);
         T max = input[0]->index(n), max_i = -1, max_j = -1;
 
-        int* in_index = new int[input[0]->ndim()];
+        int* in_index = new int[input[0]->ndim()]; // safely deleted
         for (int i=0; i<input[0]->ndim(); i++) in_index[i] = index[i];
         for (int i=0; i<this->window; i++) {
             for (int j=0; j<this->window; j++) {
@@ -57,8 +57,8 @@ Tensor_<T> MaxPooling_f<T>::_forward(Tensor_<T>** input, int ninput) {
         delete[] in_index;
     }
 
-    delete[] index;
-    delete[] new_size;
+    delete_s(index);
+    delete_s(new_size);
     return output;
 }
 
@@ -66,12 +66,12 @@ template <class T>
 void MaxPooling_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int nchildren) {
     assert (nchildren == 1);
 
-    int* index = new int[children[0]->ndim()];
+    int* index = new int[children[0]->ndim()]; // safely deleted
     for (int n=0; n<grad.nelement(); n++) {
         grad.get_index(n, index);
         int max = children[0]->index(n), max_i = -1, max_j = -1;
 
-        int* in_index = new int[children[0]->ndim()];
+        int* in_index = new int[children[0]->ndim()]; // safely deleted
         for (int i=0; i<children[0]->ndim(); i++) in_index[i] = index[i];
         for (int i=0; i<this->window; i++) {
             for (int j=0; j<this->window; j++) {
@@ -81,9 +81,9 @@ void MaxPooling_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int nc
                 children[0]->grad[sel] = mask.get(in_index) * grad.get(n);
             }
         }
-        delete[] in_index;
+        delete_s(in_index);
     }
-    delete[] index;
+    delete_s(index);
 }
 
 #endif

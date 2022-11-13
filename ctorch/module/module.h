@@ -23,7 +23,7 @@ public:
 
 template <class T>
 Module<T>::Module() {
-    _parameters = new Tensor_<T>*[2];
+    _parameters = new Tensor_<T>*[2]; // safely deleted
     _parameters[0] = &(this->weight);
     _parameters[1] = &(this->bias);
     _nparameters = 2;
@@ -31,7 +31,7 @@ Module<T>::Module() {
 
 template <class T>
 Module<T>::~Module() {
-    delete _parameters;
+    delete_s(_parameters);
 }
 
 template <class T>

@@ -5,11 +5,11 @@
 #include "../tensor/matrix.h"
 
 template <typename T>
-Tensor_<T> im2col(Tensor_<T> act, int k_size, int stride, int padding) {
-    assert(act.ndim() == 4);
+Tensor_<T> im2col(Tensor_<T>* act, int k_size, int stride, int padding) {
+    assert(act->ndim() == 4);
     assert(padding == 1 || padding == 0);
 
-    int* size = act.size();
+    int* size = act->size();
 
     int batch_ch = size[0];
     int in_ch = size[1];
@@ -36,7 +36,7 @@ Tensor_<T> im2col(Tensor_<T> act, int k_size, int stride, int padding) {
                     int col_index = (c * height_col + h) * width_col + w;
                     int ind_a[] = {i, c_im, im_row, im_col};
                     int ind_o[] = {i, h, w, c};
-                    output.index(ind_o) = act.get(ind_a);
+                    output.index(ind_o) = act->get(ind_a);
                     // output[col_index] = activation.index(ind);
                 }
             }

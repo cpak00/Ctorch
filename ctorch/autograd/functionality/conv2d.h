@@ -37,7 +37,7 @@ Tensor_<T> Conv2d_f<T>::_forward(Tensor_<T>** input, int ninput) {
     assert(ninput == 2 || ninput == 3);
     assert(input[0]->ndim() == 4 && input[1]->ndim() == 4);
 
-    input_col = im2col(*input[0], this->kern_size, this->stride, this->padding);
+    input_col = im2col(input[0], this->kern_size, this->stride, this->padding);
     Tensor_<T>* weights = input[1];
 
     output_ch = input[1]->size()[0];

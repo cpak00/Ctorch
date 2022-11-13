@@ -16,7 +16,7 @@ private:
 public:
     ReLU();
     ~ReLU() {
-        delete[] inputs;
+        delete_s(inputs);
     };
 
     Tensor_<T> & forward(Tensor_<T>& input);
@@ -25,7 +25,7 @@ public:
 template <class T>
 ReLU<T>::ReLU() {
     ninput = 1;
-    inputs = new Tensor_<T>*[ninput];
+    inputs = new Tensor_<T>*[ninput]; // safely deleted
 }
 
 template <class T>

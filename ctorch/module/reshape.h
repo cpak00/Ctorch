@@ -16,7 +16,7 @@ private:
 public:
     Reshape(int* size, int nsize);
     ~Reshape() {
-        delete[] inputs;
+        delete_s(inputs);
     };
 
     Tensor_<T> & forward(Tensor_<T>& input);
@@ -25,7 +25,7 @@ public:
 template <class T>
 Reshape<T>::Reshape(int* size, int nsize): reshape_f(size, nsize) {
     ninput = 1;
-    inputs = new Tensor_<T>*[ninput];
+    inputs = new Tensor_<T>*[ninput]; // safely deleted
 }
 
 template <class T>

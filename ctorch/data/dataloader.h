@@ -31,7 +31,7 @@ DataLoader<T>::DataLoader(Dataset<T>& dataset, int batch_size) {
 template<class T>
 bool DataLoader<T>::next(Tensor_<T> & data, Tensor_<T> & label) {
 
-    int* tensor_size = new int[nsize + 1];
+    int* tensor_size = new int[nsize + 1]; // safely deleted
     tensor_size[0] = batch_size;
     for (int i=1; i<=nsize; i++) {
         tensor_size[i] = size[i-1];
@@ -64,7 +64,7 @@ bool DataLoader<T>::next(Tensor_<T> & data, Tensor_<T> & label) {
         label.cutoff(ind);
     }
 
-    delete[] tensor_size;
+    delete_s(tensor_size);
 
     return is_next;
 }

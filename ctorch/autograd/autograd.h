@@ -21,7 +21,8 @@ Tensor_<T> Autograd<T>::forward(Tensor_<T>** input, int ninput) {
     Tensor_<T> output = this->_forward(input, ninput);
     
     /* autograd: build the operator stream */
-    output.children = new Tensor_<T>*[ninput];
+    delete_s(output.children); // safe delete
+    output.children = new Tensor_<T>*[ninput]; // be released in tensor.backward()
     for (int i=0; i<ninput; i++) output.children[i] = input[i];
     output.nchildren = ninput;
     output.grad_fn = this;

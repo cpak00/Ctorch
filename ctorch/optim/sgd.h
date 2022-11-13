@@ -20,7 +20,7 @@ public:
 
 template <class T>
 SGD<T>::SGD(Tensor_<T>** parameters, int nparameters, T lr, T momentum): Optimizer<T>(parameters, nparameters), lr(lr), momentum(momentum) {
-    history_grad = new Tensor_<T>[nparameters];
+    history_grad = new Tensor_<T>[nparameters]; // safely deleted
     for (int i=0; i<nparameters; i++) {
         history_grad[i].zeros_like(parameters[i]);
     }
@@ -28,7 +28,7 @@ SGD<T>::SGD(Tensor_<T>** parameters, int nparameters, T lr, T momentum): Optimiz
 
 template <class T>
 SGD<T>::~SGD() {
-    delete[] history_grad;
+    delete_s(history_grad);
 }
 
 template <class T>

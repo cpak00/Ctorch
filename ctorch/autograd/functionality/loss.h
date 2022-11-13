@@ -67,7 +67,7 @@ template <class T>
 void SoftmaxLoss_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int nchildren) {
 
     int batch_size = children[0]->size()[0];
-    T* exp_sum = new T[batch_size];
+    T* exp_sum = new T[batch_size]; // safely deleted
     for (int i=0; i<batch_size; i++) exp_sum[i] = 0;
 
     for (int i=0; i<children[0]->nelement(); i++) {
@@ -89,7 +89,7 @@ void SoftmaxLoss_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int n
         children[0]->grad[i] /= batch_size;
     }
 
-    delete[] exp_sum;
+    delete_s(exp_sum);
 }
 
 #endif

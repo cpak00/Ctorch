@@ -10,11 +10,11 @@ public:
     int nlayer;
 public:
     Model(int nlayer): nlayer(nlayer), _parameters(NULL) {
-        layer = new Module<float>*[nlayer];
+        layer = new Module<float>*[nlayer]; // safely deleted
     };
     ~Model() {
-        delete[] layer;
-        delete[] _parameters;
+        delete_s(layer);
+        delete_s(_parameters);
     }
 
     virtual Tensor_<T> forward(Tensor_<T> & x) = 0;
@@ -28,7 +28,7 @@ public:
             _nparameters += layer[i]->nparameters();
         }
         delete_s(_parameters);
-        _parameters = new Tensor_<T>* [_nparameters];
+        _parameters = new Tensor_<T>* [_nparameters]; // safely deleted
         
         int ind = 0;
         for (int i=0; i<nlayer; i++) {

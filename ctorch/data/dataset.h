@@ -62,11 +62,11 @@ ImageFolder<T>::ImageFolder(int* size, int nsize, const char* datapath, bool is_
     classes_ptr = 0;
 
     n_classes = classes.size();
-    n_files = new int[n_classes];
-    file_ptr = new int[n_classes];
+    n_files = new int[n_classes]; // safely deleted
+    file_ptr = new int[n_classes]; // safely deleted
     for (int i = 0; i<n_classes; i++) file_ptr[i] = 0;
 
-    filenames = new vector<string>[n_classes];
+    filenames = new vector<string>[n_classes]; // safely deleted
 
     vector<string> types;
     types.push_back(string(".png"));
@@ -83,9 +83,9 @@ ImageFolder<T>::ImageFolder(int* size, int nsize, const char* datapath, bool is_
 
 template<class T>
 ImageFolder<T>::~ImageFolder() {
-    delete[] filenames;
-    delete[] n_files;
-    delete[] file_ptr;
+    delete_s(filenames);
+    delete_s(n_files);
+    delete_s(file_ptr);
 }
 
 template<class T>

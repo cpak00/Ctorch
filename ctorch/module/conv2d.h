@@ -16,7 +16,7 @@ private:
 public:
     Conv2d(int input_channel, int output_channel, int kernal_size, int stride=1, int padding=1, bool is_bias=true);
     ~Conv2d() {
-        delete[] inputs;
+        delete_s(inputs);
     };
 
     Tensor_<T> & forward(Tensor_<T>& input);
@@ -29,7 +29,7 @@ Conv2d<T>::Conv2d(int input_channel, int output_channel, int kernal_size, int st
     this->is_bias = is_bias;
 
     ninput = (is_bias)? 3: 2;
-    inputs = new Tensor_<T>*[ninput];
+    inputs = new Tensor_<T>*[ninput]; // safely deleted
     if (is_bias) {
         int bias_size[] = {output_channel};
         this->bias = Tensor_<T>(bias_size, 1);

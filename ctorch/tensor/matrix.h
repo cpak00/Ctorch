@@ -35,7 +35,7 @@ template <typename T>
 void transpose(Tensor_<T> & data, Tensor_<T> & dest, int sel0, int sel1) {
 
     int* size0 = data.size();
-    int* size1 = dest.size();
+    int* size1 = new int[dest.ndim()]; // safely deleted
     int nsize = data.ndim();
 
     int nelement = 1;
@@ -49,8 +49,8 @@ void transpose(Tensor_<T> & data, Tensor_<T> & dest, int sel0, int sel1) {
 
     dest.reshape(size1, nsize);
 
-    int* index0 = new int[nsize];
-    int* index1 = new int[nsize];
+    int* index0 = new int[nsize]; // safely deleted
+    int* index1 = new int[nsize]; // safely deleted
 
     for (int i=0; i<nelement; i++) {
         int _i = i;
@@ -65,8 +65,10 @@ void transpose(Tensor_<T> & data, Tensor_<T> & dest, int sel0, int sel1) {
         dest.index(index1) = data.get(index0);
     }
 
-    delete[] index1;
-    delete[] index0;
+    delete_s(index1);
+    delete_s(index0);
+
+    delete_s(size1);
 
 }
 
@@ -91,8 +93,8 @@ void transpose(Tensor_<T> & data, Tensor_<T> & dest, int* sel, int nsel) {
 
     dest.reshape(size1, nsize);
 
-    int* index0 = new int[nsize];
-    int* index1 = new int[nsize];
+    int* index0 = new int[nsize]; // safely deleted
+    int* index1 = new int[nsize]; // safely deleted
 
     for (int i=0; i<nelement; i++) {
         int _i = i;
@@ -112,8 +114,8 @@ void transpose(Tensor_<T> & data, Tensor_<T> & dest, int* sel, int nsel) {
         dest.index(index1) = data.get(index0);
     }
 
-    delete[] index1;
-    delete[] index0;
+    delete_s(index1);
+    delete_s(index0);
 
 }
 
