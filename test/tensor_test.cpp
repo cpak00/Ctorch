@@ -32,4 +32,7 @@ int main() {
         }
         printf("\n");
     }
+
+    x.normal(0, 1);
+    x.pretty_print();
 }

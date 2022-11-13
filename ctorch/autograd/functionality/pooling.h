@@ -36,7 +36,7 @@ Tensor_<T> MaxPooling_f<T>::_forward(Tensor_<T>** input, int ninput) {
     int* index = new int[input[0]->ndim()];
     for (int n=0; n<output.nelement(); n++) {
         output.get_index(n, index);
-        int max = input[0]->index(n), max_i = -1, max_j = -1;
+        T max = input[0]->index(n), max_i = -1, max_j = -1;
 
         int* in_index = new int[input[0]->ndim()];
         for (int i=0; i<input[0]->ndim(); i++) in_index[i] = index[i];

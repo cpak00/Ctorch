@@ -5,6 +5,7 @@
 #include <cblas.h>
 #include <algorithm> 
 #include <stdio.h>
+#include <random>
 
 #include "../utils/def.h"
 #include "../autograd/autograd.h"
@@ -61,6 +62,8 @@ public:
     void backward(Tensor_<T> & grad);
 
     void cutoff(int batch) {assert(_ndim >= 1), _size[0] = batch;};
+
+    void normal(T mean, T var);
 };
 
 typedef Tensor_<float> FloatTensor;
@@ -189,6 +192,20 @@ Tensor_<T>::~Tensor_() {
     delete_s(this->data);
     delete_s(this->grad);
     delete_s(this->children);
+}
+
+template<class T>
+void Tensor_<T>::normal(T mean, T var) {
+    std::random_device rd;  // random_device 是一个“真随机数”发生器，它的缺点就是耗能太大，所以尽量别奢侈地一直用它
+    std::mt19937 gen(rd()); 
+    std::normal_distribution<T> dis(mean, var);
+
+    for (int i=0; i<this->nelement(); i++) {
+        T rand_data = dis(gen);
+        // rand_data = (rand_data > 1)? 1: rand_data;
+        // this->data[i] = (rand_data < -1)? -1: rand_data;
+        this->data[i] = rand_data;
+    }
 }
 
 template<class T>

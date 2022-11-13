@@ -23,6 +23,20 @@ Tensor_<T> SoftmaxLoss_f<T>::_forward(Tensor_<T>** input, int ninput) {
     assert (input[0]->ndim() == 2);
     assert (input[1]->ndim() == 1);
 
+    // remove the max value from the input[0]
+    for (int i=0; i<input[0]->size()[0]; i++) {
+        T max_value = 0;
+        for (int n=0; n<input[0]->size()[1]; n++) {
+            int ind[] = {i, n};
+            T value = input[0]->get(ind);
+            max_value = (value > max_value)? value: max_value;
+        }
+        for (int n=0; n<input[0]->size()[1]; n++) {
+            int ind[] = {i, n};
+            input[0]->index(ind) -= max_value;
+        }
+    }
+
     true_label.clone(input[1]);
 
     int size[] = {1};
