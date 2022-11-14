@@ -23,7 +23,7 @@ public:
 };
 
 template <class T>
-Reshape<T>::Reshape(int* size, int nsize): reshape_f(size, nsize) {
+Reshape<T>::Reshape(int* size, int nsize): Module<T>(0), reshape_f(size, nsize) {
     ninput = 1;
     inputs = new Tensor_<T>*[ninput]; // safely deleted
 }

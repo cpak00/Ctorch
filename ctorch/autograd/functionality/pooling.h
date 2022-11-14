@@ -10,14 +10,14 @@ protected:
     int window;
     Tensor_<T> mask;
 
-    Tensor_<T> _forward(Tensor_<T>** input, int ninput);
+    Tensor_<T> _forward(Tensor_<T>** input, int ninput, bool is_training=true);
     void _backward(Tensor_<T> & grad, Tensor_<T>** children, int nchildren);
 public:
     MaxPooling_f(int window): window(window) {};
 };
 
 template <class T>
-Tensor_<T> MaxPooling_f<T>::_forward(Tensor_<T>** input, int ninput) {
+Tensor_<T> MaxPooling_f<T>::_forward(Tensor_<T>** input, int ninput, bool is_training) {
     assert (ninput == 1);
     mask.zeros_like(input[0]);
 

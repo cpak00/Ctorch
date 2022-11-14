@@ -21,12 +21,12 @@ public:
         delete_s(size_bac);
     }
 
-    Tensor_<T> _forward(Tensor_<T>** input, int ninput);
+    Tensor_<T> _forward(Tensor_<T>** input, int ninput, bool is_training=true);
     void _backward(Tensor_<T> & grad, Tensor_<T>** children, int nchildren);
 };
 
 template <class T>
-Tensor_<T> Reshape_f<T>::_forward(Tensor_<T>** input, int ninput) {
+Tensor_<T> Reshape_f<T>::_forward(Tensor_<T>** input, int ninput, bool is_training) {
     assert (ninput == 1);
 
     int* size_new = new int[nsize_bac]; // safely deleted

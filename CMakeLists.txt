@@ -12,6 +12,7 @@ set(PROJECT_SOURCE_DIR src)
 set(EXECUTABLE_OUTPUT_PATH bin)
 
 file(GLOB_RECURSE ctorch_srcs src/*.cpp)
+message(STATUS "Source file" ${ctorch_srcs})
 
 find_package(OpenCV REQUIRED)
 message(STATUS "Opencv lib" ${OpenCV_LIBS})

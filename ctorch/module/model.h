@@ -17,6 +17,17 @@ public:
         delete_s(_parameters);
     }
 
+    void train() {
+        for (int i=0; i<nlayer; i++) {
+            layer[i]->train();
+        }
+    }
+    void eval() {
+        for (int i=0; i<nlayer; i++) {
+            layer[i]->eval();
+        }
+    }
+
     virtual Tensor_<T> forward(Tensor_<T> & x) = 0;
 
     virtual Tensor_<T>** parameters() {return _parameters;};

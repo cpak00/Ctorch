@@ -7,12 +7,12 @@
 template <class T>
 class Linear_f: public Autograd<T> {
 protected:
-    Tensor_<T> _forward(Tensor_<T>** input, int ninput);
+    Tensor_<T> _forward(Tensor_<T>** input, int ninput, bool is_training=true);
     void _backward(Tensor_<T> & grad, Tensor_<T>** children, int nchildren);
 };
 
 template <class T>
-Tensor_<T> Linear_f<T>::_forward(Tensor_<T>** input, int ninput) {
+Tensor_<T> Linear_f<T>::_forward(Tensor_<T>** input, int ninput, bool is_training) {
     assert(ninput == 2 || ninput == 3);
 
     int batch_ch = input[0]->size()[0];

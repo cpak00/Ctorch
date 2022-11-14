@@ -17,7 +17,9 @@ public:
     ~DataLoader() {};
 
     bool next(Tensor_<T> & data, Tensor_<T> & label);
-    void reset();
+    void reset() {
+        dataset->reset();
+    }
 };
 
 template<class T>

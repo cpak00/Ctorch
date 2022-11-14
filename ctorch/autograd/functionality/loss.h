@@ -13,12 +13,12 @@ protected:
     Tensor_<T> true_label;
 
 public:
-    Tensor_<T> _forward(Tensor_<T>** input, int ninput);
+    Tensor_<T> _forward(Tensor_<T>** input, int ninput, bool is_training=true);
     void _backward(Tensor_<T> & grad, Tensor_<T>** children, int nchildren);
 };
 
 template <class T>
-Tensor_<T> SoftmaxLoss_f<T>::_forward(Tensor_<T>** input, int ninput) {
+Tensor_<T> SoftmaxLoss_f<T>::_forward(Tensor_<T>** input, int ninput, bool is_training) {
     assert (ninput == 2);
     assert (input[0]->ndim() == 2);
     assert (input[1]->ndim() == 1);

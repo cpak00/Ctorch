@@ -64,6 +64,7 @@ public:
     void cutoff(int batch) {assert(_ndim >= 1), _size[0] = batch;};
 
     void normal(T mean, T var);
+    void uniform(T mean, T var);
 };
 
 typedef Tensor_<float> FloatTensor;
@@ -131,42 +132,41 @@ Tensor_<T>& Tensor_<T>::operator=(Tensor_<T>&& other) {
 
 template<class T>
 void Tensor_<T>::clone(const Tensor_<T>& other)  {
-
-    this->_ndim = other._ndim;
-    this->_nelement = other._nelement;
-    this->requires_grad = other.requires_grad;
-    this->grad_fn = other.grad_fn;
-    this->nchildren = other.nchildren;
-    
-    if (other.nchildren > 0) {
-        delete_s(this->children);
-        this->children = new Tensor_<T>*[other.nchildren];
-        for (int i=0; i<other.nchildren; i++) this->children[i] = other.children[i];
-    }
-    
-    if (other.ndim() > 0) {
-        delete_s(this->_size);
-        this->_size = new int[other.ndim()]; // safely deleted
-        for (int i=0; i<other.ndim(); i++) this->_size[i] = other._size[i];
-    }
-    
-    if (other.nelement() > 0) {
-        delete_s(this->data);
-        this->data = new T[other.nelement()]; // safely deleted
-        for (int i=0; i<other.nelement(); i++) this->data[i] = other.data[i];
-    }
-    
-    if (other.grad != NULL) {
-        delete_s(this->grad);
-        this->grad = new T[other.nelement()]; // safely deleted
-        for (int i=0; i<other.nelement(); i++) this->grad[i] = other.grad[i];
-    }
+    this->clone(&other);
 }
 
 template<class T>
 void Tensor_<T>::clone(const Tensor_<T>* other)  {
 
-    this->clone(*other);
+    this->_ndim = other->_ndim;
+    this->_nelement = other->_nelement;
+    this->requires_grad = other->requires_grad;
+    this->grad_fn = other->grad_fn;
+    this->nchildren = other->nchildren;
+    
+    if (other->nchildren > 0) {
+        delete_s(this->children);
+        this->children = new Tensor_<T>*[other->nchildren];
+        for (int i=0; i<other->nchildren; i++) this->children[i] = other->children[i];
+    }
+    
+    if (other->ndim() > 0) {
+        delete_s(this->_size);
+        this->_size = new int[other->ndim()]; // safely deleted
+        for (int i=0; i<other->ndim(); i++) this->_size[i] = other->_size[i];
+    }
+    
+    if (other->nelement() > 0) {
+        delete_s(this->data);
+        this->data = new T[other->nelement()]; // safely deleted
+        for (int i=0; i<other->nelement(); i++) this->data[i] = other->data[i];
+    }
+    
+    if (other->grad != NULL) {
+        delete_s(this->grad);
+        this->grad = new T[other->nelement()]; // safely deleted
+        for (int i=0; i<other->nelement(); i++) this->grad[i] = other->grad[i];
+    }
 
 }
 
@@ -213,6 +213,20 @@ void Tensor_<T>::normal(T mean, T var) {
     std::random_device rd;  // random_device 是一个“真随机数”发生器，它的缺点就是耗能太大，所以尽量别奢侈地一直用它
     std::mt19937 gen(rd()); 
     std::normal_distribution<T> dis(mean, var);
+
+    for (int i=0; i<this->nelement(); i++) {
+        T rand_data = dis(gen);
+        // rand_data = (rand_data > 1)? 1: rand_data;
+        // this->data[i] = (rand_data < -1)? -1: rand_data;
+        this->data[i] = rand_data;
+    }
+}
+
+template<class T>
+void Tensor_<T>::uniform(T min, T max) {
+    std::random_device rd;  // random_device 是一个“真随机数”发生器，它的缺点就是耗能太大，所以尽量别奢侈地一直用它
+    std::mt19937 gen(rd()); 
+    std::uniform_real_distribution<T> dis(min, max);
 
     for (int i=0; i<this->nelement(); i++) {
         T rand_data = dis(gen);
@@ -403,8 +417,10 @@ void Tensor_<T>::backward(Tensor_<T> & grad) {
     }
     for (int i = 0; i < this->nchildren; i++) {
         if (this->children[i]->grad_fn != NULL) {
-            Tensor_<T> new_grad = Tensor_<T>(*(this->children[i]));
-            new_grad.data = new_grad.grad;
+            Tensor_<T> new_grad;
+            new_grad.clone(this->children[i]);
+            delete_s(new_grad.data);
+            new_grad.data = new_grad.grad; // safely deleted
             new_grad.grad = NULL;
             this->children[i]->backward(new_grad);
         }

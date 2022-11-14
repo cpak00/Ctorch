@@ -23,7 +23,7 @@ public:
 };
 
 template <class T>
-MaxPooling<T>::MaxPooling(int window): maxpooling_f(window) {
+MaxPooling<T>::MaxPooling(int window): Module<T>(0), maxpooling_f(window) {
     ninput = 1;
     inputs = new Tensor_<T>*[ninput]; // safely deleted
 }

@@ -5,6 +5,6 @@
 #define NULL 0
 #endif
 
-#define delete_s(ptr) (delete[] ptr, ptr = NULL);
+#define delete_s(ptr) delete[] (ptr); (ptr) = NULL;
 
 #endif

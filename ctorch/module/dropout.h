@@ -1,12 +1,12 @@
-#ifndef _RELU_MODULE_H_
-#define _RELU_MODULE_H_
+#ifndef _DROPOUT_MODULE_H_
+#define _DROPOUT_MODULE_H_
 #include "module.h"
-#include "../autograd/functionality/activation.h"
+#include "../autograd/functionality/dropout.h"
 
 template <class T>
-class ReLU: public Module<T> {
+class Dropout: public Module<T> {
 private:
-    ReLU_f<T> relu_f;
+    Dropout_f<T> dropout_f;
     bool is_bias;
     Tensor_<T> output;
 
@@ -14,8 +14,8 @@ private:
     Tensor_<T>** inputs;
 
 public:
-    ReLU();
-    ~ReLU() {
+    Dropout(float p);
+    ~Dropout() {
         delete_s(inputs);
     };
 
@@ -23,16 +23,16 @@ public:
 };
 
 template <class T>
-ReLU<T>::ReLU(): Module<T>(0) {
+Dropout<T>::Dropout(float p): Module<T>(0), dropout_f(p) {
     ninput = 1;
     inputs = new Tensor_<T>*[ninput]; // safely deleted
 }
 
 template <class T>
-Tensor_<T> & ReLU<T>::forward(Tensor_<T> & x) {
+Tensor_<T> & Dropout<T>::forward(Tensor_<T> & x) {
     inputs[0] = &x;
 
-    output = relu_f.forward(inputs, ninput);
+    output = dropout_f.forward(inputs, ninput, this->is_training);
     return output;
 }
 

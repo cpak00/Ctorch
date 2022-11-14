@@ -36,7 +36,8 @@ void SGD<T>::step() {
     for (int i=0; i<this->nparameters; i++) {
         if (this->parameters[i]->requires_grad) {
             for (int n=0; n<this->parameters[i]->nelement(); n++) {
-                this->parameters[i]->data[n] -= this->lr *  this->parameters[i]->grad[n];
+                history_grad[i].index(n) = momentum * history_grad[i].get(n) + (1 - momentum) * this->parameters[i]->grad[n];
+                this->parameters[i]->data[n] -= this->lr * history_grad[i].get(n); // this->parameters[i]->grad[n];
             }
         }
     }

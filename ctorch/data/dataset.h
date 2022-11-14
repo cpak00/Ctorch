@@ -42,7 +42,11 @@ public:
     ~ImageFolder();
 
     bool next(Tensor_<T> & data, Tensor_<T> & label);
-    void reset() {classes_ptr = 0; file_ptr = 0;};
+    void reset() {
+        classes_ptr = 0; 
+        delete_s(file_ptr); file_ptr = new int[n_classes]; // safely deleted
+        for (int i = 0; i<n_classes; i++) file_ptr[i] = 0;
+    }
 
     int* _size() {return size;}
     int _nsize() {return nsize;}

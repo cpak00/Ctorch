@@ -17,4 +17,5 @@
 #include "module/model.h"
 #include "module/activation.h"
 #include "module/reshape.h"
+#include "module/dropout.h"
 #include "optim/sgd.h"

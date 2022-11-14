@@ -5,12 +5,13 @@
 
 template <class T>
 class Module {
-private:
+protected:
     Tensor_<T>** _parameters;
     int _nparameters;
+    bool is_training;
 
 public:
-    Module();
+    Module(int nparam=2);
     ~Module();
 
     Tensor_<T> weight;
@@ -19,14 +20,22 @@ public:
 
     virtual Tensor_<T>** parameters();
     virtual int nparameters();
+
+    void train() {is_training = true;}
+    void eval() {is_training = false;}
 };
 
 template <class T>
-Module<T>::Module() {
-    _parameters = new Tensor_<T>*[2]; // safely deleted
-    _parameters[0] = &(this->weight);
-    _parameters[1] = &(this->bias);
-    _nparameters = 2;
+Module<T>::Module(int nparam) {
+    if (nparam > 0) {
+        _parameters = new Tensor_<T>*[nparam]; // safely deleted
+        _parameters[0] = &(this->weight);
+        _parameters[1] = &(this->bias);
+    } else {
+        _parameters = NULL;
+    }
+    _nparameters = nparam;
+    is_training = true;
 }
 
 template <class T>

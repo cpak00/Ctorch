@@ -22,7 +22,7 @@ protected:
 
     Tensor_<T> input_col;
 
-    Tensor_<T> _forward(Tensor_<T>** input, int ninput);
+    Tensor_<T> _forward(Tensor_<T>** input, int ninput, bool is_training=true);
     void _backward(Tensor_<T> & grad, Tensor_<T>** children, int nchildren);
 
 public:
@@ -33,7 +33,7 @@ template<class T>
 Conv2d_f<T>::Conv2d_f(int kern_size, int stride, int padding): kern_size(kern_size), stride(stride), padding(padding) {};
 
 template <class T>
-Tensor_<T> Conv2d_f<T>::_forward(Tensor_<T>** input, int ninput) {
+Tensor_<T> Conv2d_f<T>::_forward(Tensor_<T>** input, int ninput, bool is_training) {
     assert(ninput == 2 || ninput == 3);
     assert(input[0]->ndim() == 4 && input[1]->ndim() == 4);
 
