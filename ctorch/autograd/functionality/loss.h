@@ -92,4 +92,46 @@ void SoftmaxLoss_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int n
     delete_s(exp_sum);
 }
 
+
+template <class T>
+class L2Regular_f: public Autograd<T> {
+    Tensor_<T> _forward(Tensor_<T>** input, int ninput, bool is_training=true);
+    void _backward(Tensor_<T> & grad, Tensor_<T>** children, int nchildren);
+private:
+    float lambda;
+
+public:
+    L2Regular_f(float lambda): lambda(lambda) {}
+};
+
+template <class T>
+Tensor_<T> L2Regular_f<T>::_forward(Tensor_<T>** input, int ninput, bool is_training) {
+    assert (ninput > 0);
+    
+    int o_size[] = {1};
+    Tensor_<T> output(o_size, 1);
+
+    for (int i=0; i<ninput; i++) {
+        Tensor_<T>* tensor = input[i];
+        for (int j=0; j<tensor->nelement(); j++) {
+            output.index(0) += lambda / 2. * tensor->get(j) * tensor->get(j);
+        }
+    }
+
+    return output;
+}
+
+template <class T>
+void L2Regular_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int nchildren) {
+    assert (nchildren > 0);
+
+    for (int i=0; i<nchildren; i++) {
+        Tensor_<T>* tensor = children[i];
+        for (int j=0; j<tensor->nelement(); j++) {
+            tensor->grad[j] += lambda * tensor->get(j);
+        }
+    }
+    
+}
+
 #endif

@@ -76,7 +76,7 @@ template <typename T>
 void transpose(Tensor_<T> & data, Tensor_<T> & dest, int* sel, int nsel) {
 
     int* size0 = data.size();
-    int* size1 = dest.size();
+    int* size1 = new int[dest.ndim()]; // safely deleted
     int nsize = data.ndim();
 
     assert(nsize == nsel);
@@ -116,6 +116,7 @@ void transpose(Tensor_<T> & data, Tensor_<T> & dest, int* sel, int nsel) {
 
     delete_s(index1);
     delete_s(index0);
+    delete_s(size1);
 
 }
 

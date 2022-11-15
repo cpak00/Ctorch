@@ -1,6 +1,8 @@
 #include "utils/im2col.h"
 #include "utils/init.h"
 #include "utils/def.h"
+#include "utils/metric.h"
+#include "utils/state_dict.h"
 #include "tensor/tensor.h"
 #include "tensor/matrix.h"
 #include "autograd/functionality/activation.h"

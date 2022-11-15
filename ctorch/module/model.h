@@ -1,4 +1,5 @@
 #include "module.h"
+#include "../utils/state_dict.h"
 
 template<class T>
 class Model {
@@ -32,6 +33,13 @@ public:
 
     virtual Tensor_<T>** parameters() {return _parameters;};
     virtual int nparameters() {return _nparameters;};
+
+    virtual void save_state_dict(const char* filepath) {
+        save<T>(_parameters, _nparameters, filepath);
+    }
+    virtual void load_state_dict(const char* filepath) {
+        load<T>(_parameters, _nparameters, filepath);
+    }
 
     void build() {
         _nparameters = 0;

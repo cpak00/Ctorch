@@ -1,6 +1,7 @@
 #include "../ctorch/tensor/tensor.h"
 #include "../ctorch/autograd/functionality/pooling.h"
 #include "../ctorch/autograd/functionality/loss.h"
+#include "../ctorch/utils/metric.h"
 
 int main() {
     SoftmaxLoss_f<float> softmax;
@@ -24,6 +25,9 @@ int main() {
     label.data[0] = 2;
     label.data[1] = 1;
 
+    float acc = accuracy(x, label);
+    printf("acc: %f\n", acc);
+
     FloatTensor* input[2] = {&x, &label};
     FloatTensor l = softmax.forward(input, 2);
 
@@ -33,4 +37,6 @@ int main() {
     l.backward(grad);
 
     x.pretty_print(x.grad);
+
+    
 }

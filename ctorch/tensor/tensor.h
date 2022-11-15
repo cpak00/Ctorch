@@ -6,6 +6,7 @@
 #include <algorithm> 
 #include <stdio.h>
 #include <random>
+#include <limits>
 
 #include "../utils/def.h"
 #include "../autograd/autograd.h"
@@ -65,6 +66,8 @@ public:
 
     void normal(T mean, T var);
     void uniform(T mean, T var);
+
+    void argmax(int dim, Tensor_<T> & arg, Tensor_<T> & max);
 };
 
 typedef Tensor_<float> FloatTensor;
@@ -427,6 +430,36 @@ void Tensor_<T>::backward(Tensor_<T> & grad) {
     }
     // release the children
     delete_s(this->children);
+}
+
+template <class T>
+void Tensor_<T>:: argmax(int dim, Tensor_<T> & arg, Tensor_<T> & max) {
+
+    int o_size[] = {this->_size[dim]};
+
+    arg = Tensor_<T>(o_size, 1);
+    max = Tensor_<T>(o_size, 1);
+
+    for (int i=0; i<max.nelement(); i++) {
+        max.index(i) = -std::numeric_limits<T>::max();
+    }
+
+    int* size_ptr = new int[this->ndim()];
+
+    for (int n=0; n<this->_nelement; n++) {
+        this->get_index(n, size_ptr);
+        T dim_max = max.get(size_ptr[dim]);
+        if (this->get(n) > dim_max) {
+            max.index(size_ptr[dim]) = this->get(n);
+            arg.index(size_ptr[dim]) = 1;
+            for (int i=0; i<this->ndim(); i++) {
+                if (i == dim) continue;
+                arg.index(size_ptr[dim]) *= size_ptr[i];
+            }
+        }
+    }
+
+    delete_s(size_ptr);
 }
 
 #endif

@@ -42,6 +42,9 @@ target_link_libraries(transpose_test openblas pthread gfortran ${OpenCV_LIBS})
 add_executable(pooling_test test/pooling_test.cpp ${ctorch_srcs})
 target_link_libraries(pooling_test openblas pthread gfortran ${OpenCV_LIBS})
 
+add_executable(load_test test/load_test.cpp ${ctorch_srcs})
+target_link_libraries(load_test openblas pthread gfortran ${OpenCV_LIBS})
+
 add_executable(loss_test test/loss_test.cpp ${ctorch_srcs})
 target_link_libraries(loss_test openblas pthread gfortran ${OpenCV_LIBS})
 
