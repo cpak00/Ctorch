@@ -49,7 +49,7 @@ int main() {
     printf("grad\n");
     FloatTensor grad;
     grad.zeros_like(output);
-    for (int i = 0; i < z.nelement(); i++) {
+    for (int i = 0; i < grad.nelement(); i++) {
         grad.data[i] = 1.f;
     }
 
@@ -71,10 +71,10 @@ int main() {
     layer2.bias.pretty_print(layer2.bias.grad);
 
     FloatTensor** parameters = new FloatTensor*[4];
-    parameters[0] = &layer1.weight;
-    parameters[1] = &layer1.bias;
-    parameters[2] = &layer2.weight;
-    parameters[3] = &layer2.bias;
+    parameters[0] = &(layer1.weight);
+    parameters[1] = &(layer1.bias);
+    parameters[2] = &(layer2.weight);
+    parameters[3] = &(layer2.bias);
 
     SGD<float> optimizer(layer1.parameters(), layer1.nparameters(), 0.01, 0);
     
@@ -90,4 +90,6 @@ int main() {
     kaiming_normal_(layer1.parameters(), layer1.nparameters());
     layer1.weight.pretty_print();
     layer1.bias.pretty_print();
+
+    delete_s(parameters);
 }

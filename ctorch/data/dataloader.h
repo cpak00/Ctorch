@@ -3,10 +3,11 @@
 #include "../tensor/tensor.h"
 #include <opencv2/opencv.hpp>
 #include "dataset.h"
+#include "../utils/norm.h"
 
 template <class T>
 class DataLoader {
-private:
+public:
     Dataset<T>* dataset;
     int batch_size;
     int* size;
@@ -62,12 +63,18 @@ bool DataLoader<T>::next(Tensor_<T> & data, Tensor_<T> & label) {
     }
     
     if (ind < this->batch_size) {
-        data.cutoff(ind);
-        label.cutoff(ind);
+        data.cutoff(ind-1);
+        label.cutoff(ind-1);
+        is_next = false;
+    }
+
+    // transform
+    for (int i=0; i<data.size()[0]; i++) {
+        int image_size = data.nelement() / data.size()[0];
+        normalize<T>(data.data + i * image_size, image_size, 0.5, 0.5);
     }
 
     delete_s(tensor_size);
-
     return is_next;
 }
 

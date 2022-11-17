@@ -13,9 +13,8 @@ public:
     Model(int nlayer): nlayer(nlayer), _parameters(NULL) {
         layer = new Module<float>*[nlayer]; // safely deleted
     };
-    ~Model() {
-        delete_s(layer);
-        delete_s(_parameters);
+    virtual ~Model() {
+        delete_s(this->layer);
     }
 
     void train() {

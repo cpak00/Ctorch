@@ -98,11 +98,13 @@ void Conv2d_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int nchild
     int trans_grad[] = {1, 2, 3, 0};
     transpose(grad, grad_tran, trans_grad, 4);
 
+    /*
     for (int i = 0; i<nchildren; i++) {
         if (children[i]->grad == NULL) {
             children[i]->grad = new T[children[i]->nelement()];
         }
     }
+    */
 
     int x_grad_size[] = {expand_size, act_size * batch_size};
     Tensor_<T> x_grad_column(x_grad_size, 2);
@@ -115,7 +117,7 @@ void Conv2d_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int nchild
     x_hat.zeros_like(input_col);
     transpose(input_col, x_hat, 0, 1);
 
-    gemm<float>(CblasRowMajor, CblasNoTrans, CblasNoTrans, output_ch, expand_size, batch_size * act_size, 1., grad_tran.data, batch_size * act_size, x_hat.data, expand_size, 0., children[1]->grad, expand_size);
+    gemm<float>(CblasRowMajor, CblasNoTrans, CblasNoTrans, output_ch, expand_size, batch_size * act_size, 1., grad_tran.data, batch_size * act_size, x_hat.data, expand_size, 1., children[1]->grad, expand_size);
     gemm<float>(CblasRowMajor, CblasTrans, CblasNoTrans, expand_size, act_size * batch_size, output_ch, 1., children[1]->data, expand_size, grad_tran.data, act_size * batch_size, 0., x_grad_column.data, act_size * batch_size);
 
     int x_grad_column_size[] = {expand_size, input_col.size()[1], batch_size};
@@ -134,7 +136,7 @@ void Conv2d_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int nchild
 
     col2im(x_grad_column_tran, x_grad, kern_size, stride, padding);
 
-    for (int i=0; i<children[0]->nelement(); i++) children[0]->grad[i] = x_grad.data[i];
+    for (int i=0; i<children[0]->nelement(); i++) children[0]->grad[i] += x_grad.data[i];
     
 }
 

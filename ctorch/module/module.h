@@ -6,13 +6,13 @@
 template <class T>
 class Module {
 protected:
-    Tensor_<T>** _parameters;
+    Tensor_<T>** _parameters = 0;
     int _nparameters;
     bool is_training;
 
 public:
     Module(int nparam=2);
-    ~Module();
+    virtual ~Module();
 
     Tensor_<T> weight;
     Tensor_<T> bias;
@@ -40,7 +40,11 @@ Module<T>::Module(int nparam) {
 
 template <class T>
 Module<T>::~Module() {
-    delete_s(_parameters);
+    for (int i=0; i<_nparameters; i++) {
+        _parameters[i] = NULL;
+    }
+    if (_nparameters > 0)
+        delete_s(_parameters);
 }
 
 template <class T>

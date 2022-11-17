@@ -35,7 +35,7 @@ void ReLU_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int nchildre
     assert (nchildren == 1);
 
     for (int i=0; i<grad.nelement(); i++) {
-        children[0]->grad[i] = grad.get(i) * mask.get(i);
+        children[0]->grad[i] += grad.get(i) * mask.get(i);
     }
 
 }

@@ -32,7 +32,7 @@ void Add_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int nchildren
 
     for (int i=0; i<nchildren; i++) {
         for (int n=0; n<grad.nelement(); n++) {
-            children[i]->grad[n] = grad.data[n];
+            children[i]->grad[n] += grad.data[n];
         }
     }
 

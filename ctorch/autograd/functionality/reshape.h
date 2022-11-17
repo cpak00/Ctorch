@@ -48,6 +48,7 @@ Tensor_<T> Reshape_f<T>::_forward(Tensor_<T>** input, int ninput, bool is_traini
     size_for = new int[nsize_for]; // safely deleted
     for (int i=0; i<nsize_for; i++) size_for[i] = output.size()[i];
 
+    // output.cutoff(size_new[0]);
     output.reshape(size_new, nsize_bac);
 
     delete_s(size_new);
@@ -59,7 +60,7 @@ void Reshape_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int nchil
     assert (nchildren == 1);
 
     for (int i=0; i<grad.nelement(); i++) {
-        children[0]->grad[i] = grad.get(i);
+        children[0]->grad[i] += grad.get(i);
     }
 
     children[0]->reshape(size_for ,nsize_for);

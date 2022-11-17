@@ -56,3 +56,12 @@ target_link_libraries(opencv_test openblas pthread gfortran ${OpenCV_LIBS})
 
 add_executable(vgg_mnist sample/vgg_mnist.cpp ${ctorch_srcs})
 target_link_libraries(vgg_mnist openblas pthread gfortran ${OpenCV_LIBS})
+
+add_executable(resnet_mnist sample/resnet_mnist.cpp ${ctorch_srcs})
+target_link_libraries(resnet_mnist openblas pthread gfortran ${OpenCV_LIBS})
+
+add_executable(mlp_mnist sample/mlp_mnist.cpp ${ctorch_srcs})
+target_link_libraries(mlp_mnist openblas pthread gfortran ${OpenCV_LIBS})
+
+add_executable(conv_mnist sample/conv_mnist.cpp ${ctorch_srcs})
+target_link_libraries(conv_mnist openblas pthread gfortran ${OpenCV_LIBS})

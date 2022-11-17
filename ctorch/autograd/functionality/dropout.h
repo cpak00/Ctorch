@@ -43,9 +43,9 @@ void Dropout_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int nchil
 
     for (int i=0; i<grad.nelement(); i++) {
         if (mask.get(i) > p) {
-            children[0]->grad[i] = grad.get(i) / (1 - p);
+            children[0]->grad[i] += grad.get(i) / (1 - p);
         } else {
-            children[0]->grad[i] = 0.f;
+            children[0]->grad[i] += 0.f;
         } 
     }
 }

@@ -14,6 +14,7 @@ using namespace cv;
 template <class T>
 class Dataset {
 public:
+
     virtual bool next(Tensor_<T> & data, Tensor_<T> & label) = 0;
     virtual void reset() = 0;
     
@@ -31,11 +32,11 @@ private:
     vector<string> *filenames;
     int* n_files;
 
-    int classes_ptr;
-    int* file_ptr;
-
     int* size;
     int nsize;
+
+    int classes_ptr;
+    int* file_ptr;
 
 public:
     ImageFolder(int* size, int nsize, const char* datapath, bool is_shuffle = false);
@@ -43,9 +44,9 @@ public:
 
     bool next(Tensor_<T> & data, Tensor_<T> & label);
     void reset() {
-        classes_ptr = 0; 
-        delete_s(file_ptr); file_ptr = new int[n_classes]; // safely deleted
-        for (int i = 0; i<n_classes; i++) file_ptr[i] = 0;
+        this->classes_ptr = 0; 
+        delete_s(this->file_ptr); this->file_ptr = new int[n_classes]; // safely deleted
+        for (int i = 0; i<n_classes; i++) this->file_ptr[i] = 0;
     }
 
     int* _size() {return size;}
@@ -63,12 +64,12 @@ ImageFolder<T>::ImageFolder(int* size, int nsize, const char* datapath, bool is_
     list_dir(datapath, classes);
     sort(classes.begin(), classes.end(), [](string a, string b) {return a.c_str()[a.size()-1] < b.c_str()[b.size()-1];});
 
-    classes_ptr = 0;
+    this->classes_ptr = 0;
 
     n_classes = classes.size();
     n_files = new int[n_classes]; // safely deleted
-    file_ptr = new int[n_classes]; // safely deleted
-    for (int i = 0; i<n_classes; i++) file_ptr[i] = 0;
+    this->file_ptr = new int[n_classes]; // safely deleted
+    for (int i = 0; i<n_classes; i++) this->file_ptr[i] = 0;
 
     filenames = new vector<string>[n_classes]; // safely deleted
 
@@ -89,30 +90,30 @@ template<class T>
 ImageFolder<T>::~ImageFolder() {
     delete_s(filenames);
     delete_s(n_files);
-    delete_s(file_ptr);
+    delete_s(this->file_ptr);
 }
 
 template<class T>
 bool ImageFolder<T>::next(Tensor_<T> & data, Tensor_<T> & label) {
     /*
-    if (classes_ptr >= n_classes - 1) {
-        classes_ptr = 0;
+    if (this->classes_ptr >= n_classes - 1) {
+        this->classes_ptr = 0;
     } else {
-        classes_ptr++;
+        this->classes_ptr++;
     }
     */
 
-   classes_ptr = rand() % n_classes;
+   this->classes_ptr = rand() % n_classes;
 
-    for (int n=0; n<n_classes; n++) {
-        if (file_ptr[classes_ptr] >= n_files[classes_ptr]) {
-            classes_ptr++;
+    for (int n=0; n<n_classes-1; n++) {
+        if (this->file_ptr[this->classes_ptr] >= n_files[this->classes_ptr]) {
+            this->classes_ptr = (this->classes_ptr + 1) % n_classes;
         } else {
-            string file = string(datapath) + "/" + classes[classes_ptr] + "/" +filenames[classes_ptr][file_ptr[classes_ptr]];
+            string file = string(datapath) + "/" + classes[this->classes_ptr] + "/" +filenames[this->classes_ptr][this->file_ptr[this->classes_ptr]];
             data = Tensor_<T>(size, nsize);
             int label_size[] = {1};
             label = Tensor_<T>(label_size, 1);
-            label.data[0] = classes_ptr;
+            label.data[0] = this->classes_ptr;
 
             Mat img;
 
@@ -131,6 +132,10 @@ bool ImageFolder<T>::next(Tensor_<T> & data, Tensor_<T> & label) {
             for (int i=0; i<data.nelement(); i++) {
                 data.index(i) = img_resized.data[i] / 255.;
             }
+
+            this->file_ptr[this->classes_ptr]++;
+
+            // printf("%s\n", file.c_str());
 
             return true;
         }

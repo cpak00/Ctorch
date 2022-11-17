@@ -7,12 +7,18 @@ int main() {
     ReLU_f<float> relu;
 
 
-    int size_x[] = {2, 4, 4};
-    FloatTensor x(size_x, 3, true);
+    int size_x[] = {2, 2, 4, 4};
+    FloatTensor x(size_x, 4, true);
 
     for (int i = 0; i < x.nelement(); i++) {
         x.data[i] = rand() % 10 - 5;
     }
+    x.pretty_print();
+
+    for (int i=0; i<x.nelement(); i++) {
+        printf("%2.2f, ", x.data[i]);
+    }
+    printf("\n");
 
     FloatTensor* input[] = {&x};
     FloatTensor output1 = pool.forward(input, 1);
@@ -20,7 +26,7 @@ int main() {
     FloatTensor* input2[] = {&output1};
     FloatTensor output2 = relu.forward(input2, 1);
 
-    x.pretty_print();
+    
     output1.pretty_print();
     output2.pretty_print();
 

@@ -52,16 +52,19 @@ void Linear_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int nchild
             children[2]->grad[bias_ind[1]] += grad.get(i);
         }
     }
-
+    /*
     for (int i = 0; i<nchildren; i++) {
         if (children[i]->grad == NULL) {
             children[i]->grad = new T[children[i]->nelement()];
         }
     }
+    */
 
     int batch_ch = children[0]->size()[0];
     int input_ch = children[0]->size()[1];
     int output_ch = children[1]->size()[0];
+
+    assert(children[0]->nelement() == batch_ch * input_ch);
 
     gemm<T>(CblasRowMajor, CblasNoTrans, CblasNoTrans, batch_ch, input_ch, output_ch,
         1., grad.data, output_ch, children[1]->data, input_ch, 0., children[0]->grad, input_ch);

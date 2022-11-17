@@ -70,23 +70,30 @@ void SoftmaxLoss_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int n
     T* exp_sum = new T[batch_size]; // safely deleted
     for (int i=0; i<batch_size; i++) exp_sum[i] = 0;
 
+    Tensor_<T> children_grad;
+    children_grad.zeros_like(children[0]);
+
     for (int i=0; i<children[0]->nelement(); i++) {
-        children[0]->grad[i] = exp(children[0]->data[i]);
-        exp_sum[i / children[0]->size()[1]] += children[0]->grad[i];
+        children_grad.data[i] = exp(children[0]->data[i]);
+        exp_sum[i / children[0]->size()[1]] += children_grad.data[i];
     }
 
     for (int i=0; i<children[0]->nelement(); i++) {
-        children[0]->grad[i] /= exp_sum[i / children[0]->size()[1]];
+        children_grad.data[i] /= exp_sum[i / children[0]->size()[1]];
     }
 
     for (int i=0; i<batch_size; i++) {
         int ind[] = {i, (int) true_label.get(i)};
         int n = children[0]->get_index(ind);
-        children[0]->grad[n] -= 1;
+        children_grad.data[n] -= 1;
     }
 
     for (int i=0; i<children[0]->nelement(); i++) {
-        children[0]->grad[i] /= batch_size;
+        children_grad.data[i] /= batch_size;
+    }
+
+    for (int i=0; i<children_grad.nelement(); i++) {
+        children[0]->grad[i] += children_grad.get(i);
     }
 
     delete_s(exp_sum);
@@ -113,6 +120,7 @@ Tensor_<T> L2Regular_f<T>::_forward(Tensor_<T>** input, int ninput, bool is_trai
 
     for (int i=0; i<ninput; i++) {
         Tensor_<T>* tensor = input[i];
+        if (tensor->ndim() < 2) continue;
         for (int j=0; j<tensor->nelement(); j++) {
             output.index(0) += lambda / 2. * tensor->get(j) * tensor->get(j);
         }
@@ -127,6 +135,7 @@ void L2Regular_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int nch
 
     for (int i=0; i<nchildren; i++) {
         Tensor_<T>* tensor = children[i];
+        if (tensor->ndim() < 2) continue;
         for (int j=0; j<tensor->nelement(); j++) {
             tensor->grad[j] += lambda * tensor->get(j);
         }

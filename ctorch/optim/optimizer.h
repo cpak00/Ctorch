@@ -18,7 +18,7 @@ void Optimizer<T>::zero_grad() {
     for (int i=0; i<nparameters; i++) {
         if (parameters[i]->requires_grad) {
             for (int n=0; n<parameters[i]->nelement(); n++) {
-                parameters[i]->grad[n] = 0.;
+                parameters[i]->grad[n] = 0.f;
             }
         }
     }

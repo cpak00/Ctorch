@@ -15,14 +15,21 @@ int main()
     // img.pretty_print();
     // abel.pretty_print();
 
-    DataLoader<float> trainloader(mnist_train, 10);
+    DataLoader<float> trainloader(mnist_train, 512);
 
-    FloatTensor data;
-    FloatTensor label;
-    trainloader.next(data, label);
+    bool is_next = true;
 
-    data.pretty_print();
-    label.pretty_print();
+    int step = 0;
+
+    while (is_next) {
+        FloatTensor data;
+        FloatTensor label;
+        is_next = trainloader.next(data, label);
+
+        step++;
+        printf("step: %d\n", step);
+
+    }
 
 }
 

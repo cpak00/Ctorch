@@ -50,7 +50,7 @@ int main() {
     printf("grad\n");
     FloatTensor grad;
     grad.zeros_like(output);
-    for (int i = 0; i < z.nelement(); i++) {
+    for (int i = 0; i < grad.nelement(); i++) {
         grad.data[i] = 1.f;
     }
 

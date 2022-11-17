@@ -3,5 +3,4 @@ cloc . --exclude-dir=build
 mkdir -p build
 cd build
 cmake ..
-make clean
-make
+make USE_THREAD=8

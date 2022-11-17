@@ -19,7 +19,10 @@ protected:
 template <class T>
 Tensor_<T> Autograd<T>::forward(Tensor_<T>** input, int ninput, bool is_training) {
     Tensor_<T> output = this->_forward(input, ninput, is_training);
-    
+    for (int i=0; i<ninput; i++) {
+        input[i]->is_root = false;
+    }
+
     /* autograd: build the operator stream */
     delete_s(output.children); // safe delete
     output.children = new Tensor_<T>*[ninput]; // be released in tensor.backward()
