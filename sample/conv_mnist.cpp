@@ -21,7 +21,7 @@ public:
         int linear_size[] = {-1, hidden_size * 16 * 16};
         reshape = new Reshape<T>(linear_size, 2);
 
-        this->layer[1] = new Linear<T>(hidden_size * 8 * 8, hidden_size * 4);
+        this->layer[1] = new Linear<T>(hidden_size * 16 * 16, hidden_size * 4);
         this->layer[2] = new Dropout<T>(0.2);
         this->layer[3] = new Linear<T>(hidden_size * 4, 10);
 
@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
     SoftmaxLoss_f<float> criterion;
     L2Regular_f<float> regularization(0.005);
     SGD<float> optimizer(model.parameters(), model.nparameters(), 0.01, 0.9);
-    int epoch_size = 100;
+    int epoch_size = 60;
 
     int size[] = {1, 32, 32};
     ImageFolder<float> mnist_train(size, 3, "/home/chenym/Code/Project/Ctorch/datasets/mnist_png/training", true);
@@ -114,16 +114,16 @@ int main(int argc, char** argv) {
                 step++;
                 printf("Epoch %3d.%3d loss: %2.4f (avg: %2.2f)\t acc: %2.1f%% (avg: %2.1f%%) \n", i, step, loss.data[0], sum_loss / step, acc * 100.0, sum_acc / step * 100.0);
 
-                // optimizer.zero_grad();
+                optimizer.zero_grad();
                 FloatTensor grad;
                 loss.backward(grad);
                 reg.backward(grad);
-                // optimizer.step();
+                optimizer.step();
                 // out.pretty_print();
 
                 model.save_state_dict("conv_mnist_checkpoint.pth.tar");
             }
-            printf("Epoch %3d Loss: %2.2f\n", i, sum_loss / step);
+            printf("= Epoch %3d Loss: %2.2f Acc: %2.1f%%\n", i, sum_loss / step, sum_acc / step *100.0);
 
             if (i % 5 == 4) {
                 model.eval();
@@ -147,6 +147,7 @@ int main(int argc, char** argv) {
                     step++;
                     printf("Eval %3d.%3d loss: %2.4f (avg: %2.2f)\t acc: %2.1f%% (avg: %2.1f%%) \n", i, step, loss.data[0], sum_loss / step, acc * 100.0, sum_acc / step * 100.0);
                 }
+                printf("= Eval %3d loss: %2.4f \t acc: %2.1f%%  \n", i, sum_loss / step, sum_acc / step * 100.0);
             }
         }
     } else {

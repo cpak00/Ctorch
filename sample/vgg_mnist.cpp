@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
     SoftmaxLoss_f<float> criterion;
     L2Regular_f<float> regularization(0.005);
     SGD<float> optimizer(model.parameters(), model.nparameters(), 0.01, 0.9);
-    int epoch_size = 100;
+    int epoch_size = 60;
 
     int size[] = {1, 32, 32};
     ImageFolder<float> mnist_train(size, 3, "/home/chenym/Code/Project/Ctorch/datasets/mnist_png/training", true);
@@ -148,7 +148,7 @@ int main(int argc, char** argv) {
 
                 model.save_state_dict("vgg_mnist_checkpoint.pth.tar");
             }
-            printf("Epoch %3d Loss: %2.2f\n", i, sum_loss / step);
+            printf("= Epoch %3d Loss: %2.2f Acc: %2.1f%%\n", i, sum_loss / step, sum_acc / step *100.0);
 
             model.eval();
             sum_loss = 0.f; sum_acc = 0.f; step = 0;
@@ -171,6 +171,7 @@ int main(int argc, char** argv) {
                 step++;
                 printf("Eval %3d.%3d loss: %2.4f (avg: %2.2f)\t acc: %2.1f%% (avg: %2.1f%%) \n", i, step, loss.data[0], sum_loss / step, acc * 100.0, sum_acc / step * 100.0);
             }
+            printf("= Eval %3d loss: %2.4f \t acc: %2.1f%%  \n", i, sum_loss / step, sum_acc / step * 100.0);
         }
     } else {
         model.eval();
