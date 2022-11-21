@@ -39,6 +39,8 @@ public:
     Tensor_(int* size, int dim, bool requires_grad = true);
     Tensor_(const Tensor_<T> & other);
     Tensor_(Tensor_<T> && other);
+    ~Tensor_();
+
     Tensor_<T>& operator=(Tensor_<T>& other);
     Tensor_<T>& operator=(Tensor_<T>&& other);
     
@@ -46,9 +48,6 @@ public:
     void zeros_like(const Tensor_<T> & tensor);
     void clone(const Tensor_<T> * tensor);
     void zeros_like(const Tensor_<T> * tensor);
-    // Tensor_(Tensor_<T>&& other);
-    // Tensor_<T>& operator=(Tensor_<T>&& other);
-    ~Tensor_();
 
     int ndim() const;
     int nelement() const;
@@ -62,15 +61,14 @@ public:
     T& index(int ind);
     T get(int* ind);
     T get(int ind);
+
     void pretty_print(T* printed_data = NULL);
 
     void backward(Tensor_<T> & grad);
 
     void cutoff(int batch) {assert(_ndim >= 1), _size[0] = batch; _nelement = 1; for(int i=0;i<_ndim;i++) {_nelement *= _size[i];}};
-
     void normal(T mean, T var);
     void uniform(T mean, T var);
-
     void argmax(int dim, Tensor_<T> & arg, Tensor_<T> & max);
 };
 

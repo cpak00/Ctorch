@@ -23,7 +23,7 @@ Tensor_<T> Autograd<T>::forward(Tensor_<T>** input, int ninput, bool is_training
         input[i]->is_root = false;
     }
 
-    /* autograd: build the operator stream */
+    /* autograd: build the operator graph */
     delete_s(output.children); // safe delete
     output.children = new Tensor_<T>*[ninput]; // be released in tensor.backward()
     for (int i=0; i<ninput; i++) output.children[i] = input[i];
