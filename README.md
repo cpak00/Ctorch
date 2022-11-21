@@ -28,16 +28,16 @@ This work uses CMake for building. run `./build.sh` can build the total project.
 Here provide the training process of samples: MLP, AlexNet, VGGNet, and ResNet:
 - MLP
   
-![](sample/mlp_mnist.png)
+![](sample/mlp_mnist.jpg)
 - AlexNet
   
-![](sample/conv_mnist.png)
+![](sample/conv_mnist.jpg)
 - VGGNet
   
-![](sample/vgg_mnist.png)
+![](sample/vgg_mnist.jpg)
 - ResNet
   
-![](sample/resnet_mnist.png)
+![](sample/resnet_mnist.jpg)
 
 
 
