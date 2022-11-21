@@ -25,6 +25,23 @@ The source code is located in the folder `ctorch`. Sample code for training and 
 
 This work uses CMake for building. run `./build.sh` can build the total project.
 
+Here provide the training process of samples: MLP, AlexNet, VGGNet, and ResNet:
+- MLP
+  
+![](sample/mlp_mnist.png)
+- AlexNet
+  
+![](sample/conv_mnist.png)
+- VGGNet
+  
+![](sample/vgg_mnist.png)
+- ResNet
+  
+![](sample/resnet_mnist.png)
+
+
+
+
 ### Dependencies
 - OpenBLAS:
 `sudo apt-get install libopenblas-openmp-dev libgfortran-9-dev`
