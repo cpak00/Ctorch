@@ -13,7 +13,7 @@ A completely C/C++ implementation of a convolutional neural network training and
     - [Dataloader](#dataloader)
     - [Optimizer](#optimizer)
   - [Sample](#sample)
-  - [Acknowledgement#](#acknowledgement)
+  - [Acknowledgement](#acknowledgement)
     - [Library](#library)
     - [Dataset](#dataset)
 
@@ -290,13 +290,12 @@ public:
         x[6] = this->layer[2]->forward(x[5]);
         x[7] = this->layer[3]->forward(x[6]);
 
-        // printf("(%d %d %d %d)\n", x[8].size()[0], x[8].size()[1], x[8].size()[2], x[8].size()[3]);
         return x[7];
     }
 };
 ```
 
-## Acknowledgement#
+## Acknowledgement
 
 ### Library
 - [OpenBLAS](https://github.com/xianyi/OpenBLAS)
