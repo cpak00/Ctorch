@@ -16,60 +16,60 @@ template <class T> class Autograd;
 template <class T>
 class Tensor_ {
 private:
-    int* _size;
-    int _ndim;
-    int _nelement;
+    int* _size;                 // size of multi-dimension tensor
+    int _ndim;                  // number of dimension
+    int _nelement;              // number of element
 
-    void clear_children();
+    void clear_children();      // Iterative clear children after backward
 
 public:
-    bool is_root;
+    bool is_root;               // is it a start point of back propagation
 
-    T* data = NULL;
-    T* grad = NULL;
-    T padding;
+    T* data = NULL;             // pointer to the data
+    T* grad = NULL;             // pointer to the grad
+    T padding;                  // padding value
     
-    bool requires_grad;
-    Tensor_<T>** children;
-    int nchildren;
-    // void (*grad_fn)(Tensor_<T> & grad, Tensor_<T>* children, int nchildren);
-    Autograd<T>* grad_fn;
+    bool requires_grad;         // grad requires
+    Tensor_<T>** children;      // pointer to the tensors which generate this tensor
+    int nchildren;              // number of children
+
+    Autograd<T>* grad_fn;       // pointer to the autograd classes to get the backward function
 
     Tensor_(bool requires_grad = true);
     Tensor_(int* size, int dim, bool requires_grad = true);
     Tensor_(const Tensor_<T> & other);
     Tensor_(Tensor_<T> && other);
     ~Tensor_();
-
     Tensor_<T>& operator=(Tensor_<T>& other);
     Tensor_<T>& operator=(Tensor_<T>&& other);
     
     void clone(const Tensor_<T> & tensor);
-    void zeros_like(const Tensor_<T> & tensor);
     void clone(const Tensor_<T> * tensor);
+    void zeros_like(const Tensor_<T> & tensor);
     void zeros_like(const Tensor_<T> * tensor);
 
     int ndim() const;
     int nelement() const;
     int* size();
-    void reshape(int* new_size, int nsize);
-    Tensor_<T> rotate180();
-    void get_index(int n, int* index);
-    int get_index(int* index);
 
-    T& index(int* ind);
-    T& index(int ind);
-    T get(int* ind);
+    void reshape(int* new_size, int nsize);         // reshape the tensor
+    Tensor_<T> rotate180();                         // rotate the tensor for 180degree (depracated)
+    void get_index(int n, int* index);              // map the 1d index n to multi-dimension index
+    int get_index(int* index);                      // map multi-dimension index to 1d index
+
+    T& index(int* ind);                             // locate certain data (reference)
+    T& index(int ind);                              
+    T get(int* ind);                                // locate certain data (cloned)
     T get(int ind);
 
-    void pretty_print(T* printed_data = NULL);
+    void pretty_print(T* printed_data = NULL);      // pretty printf for debug
 
-    void backward(Tensor_<T> & grad);
+    void backward(Tensor_<T> & grad);               // back propagate the grad according to the children tensor
 
-    void cutoff(int batch) {assert(_ndim >= 1), _size[0] = batch; _nelement = 1; for(int i=0;i<_ndim;i++) {_nelement *= _size[i];}};
-    void normal(T mean, T var);
-    void uniform(T mean, T var);
-    void argmax(int dim, Tensor_<T> & arg, Tensor_<T> & max);
+    void cutoff(int batch) {assert(_ndim >= 1), _size[0] = batch; _nelement = 1; for(int i=0;i<_ndim;i++) {_nelement *= _size[i];}}; // cut the batch size
+    void normal(T mean, T var);                     // generate the data by normal distribution
+    void uniform(T mean, T var);                    // generate the data by uniform distribution
+    void argmax(int dim, Tensor_<T> & arg, Tensor_<T> & max);   // find the location of max in certain dimension
 };
 
 typedef Tensor_<float> FloatTensor;
@@ -219,28 +219,24 @@ Tensor_<T>::~Tensor_() {
 
 template<class T>
 void Tensor_<T>::normal(T mean, T var) {
-    std::random_device rd;  // random_device 是一个“真随机数”发生器，它的缺点就是耗能太大，所以尽量别奢侈地一直用它
+    std::random_device rd;
     std::mt19937 gen(rd()); 
     std::normal_distribution<T> dis(mean, var);
 
     for (int i=0; i<this->nelement(); i++) {
         T rand_data = dis(gen);
-        // rand_data = (rand_data > 1)? 1: rand_data;
-        // this->data[i] = (rand_data < -1)? -1: rand_data;
         this->data[i] = rand_data;
     }
 }
 
 template<class T>
 void Tensor_<T>::uniform(T min, T max) {
-    std::random_device rd;  // random_device 是一个“真随机数”发生器，它的缺点就是耗能太大，所以尽量别奢侈地一直用它
+    std::random_device rd; 
     std::mt19937 gen(rd()); 
     std::uniform_real_distribution<T> dis(min, max);
 
     for (int i=0; i<this->nelement(); i++) {
         T rand_data = dis(gen);
-        // rand_data = (rand_data > 1)? 1: rand_data;
-        // this->data[i] = (rand_data < -1)? -1: rand_data;
         this->data[i] = rand_data;
     }
 }
@@ -341,7 +337,6 @@ Tensor_<T> Tensor_<T>::rotate180() {
         output.index(index1) = this->get(index0);
     }
 
-
     delete_s(index0);
     delete_s(index1);
     delete_s(new_size);
@@ -403,20 +398,6 @@ void Tensor_<T>::pretty_print(T* printed_data) {
     
     delete_s(ind);
 
-    /*
-    int length = 7;
-    printf("[");
-    for (int i = 0; i < this->nelement(); i++) {
-        if (i == length && i < this->nelement() - 2) {
-            printf(" ... ");
-            continue;
-        }
-        if (i > length && i < this->nelement() - 2) continue;
-        printf("%.2f, ", this->data[i]);
-    }
-    printf("]\n");
-    */
-
 }
 
 template<class T>
@@ -431,9 +412,11 @@ void Tensor_<T>::clear_children() {
 template<class T>
 void Tensor_<T>::backward(Tensor_<T> & grad) {
     if (this->requires_grad && this->grad_fn) {
+        // backward for this tensor
         grad_fn->backward(grad, this->children, this->nchildren);
     }
     for (int i = 0; i < this->nchildren; i++) {
+        // iteratly calculate the gradient for all children
         if (this->children[i]->grad_fn != NULL) {
             Tensor_<T> new_grad;
             new_grad.clone(this->children[i]);
@@ -467,9 +450,11 @@ void Tensor_<T>:: argmax(int dim, Tensor_<T> & arg, Tensor_<T> & max) {
     for (int n=0; n<this->_nelement; n++) {
         this->get_index(n, size_ptr);
         T dim_max = max.get(size_ptr[dim]);
+        // when the new item is a bigger one
         if (this->get(n) > dim_max) {
             max.index(size_ptr[dim]) = this->get(n);
             arg.index(size_ptr[dim]) = 1;
+            // locate the max in one dimension
             for (int i=0; i<this->ndim(); i++) {
                 if (i == dim) continue;
                 arg.index(size_ptr[dim]) *= size_ptr[i];

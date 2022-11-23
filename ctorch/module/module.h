@@ -18,11 +18,11 @@ public:
     Tensor_<T> bias;
     virtual Tensor_<T> & forward(Tensor_<T> & input) = 0;
 
-    virtual Tensor_<T>** parameters();
-    virtual int nparameters();
+    virtual Tensor_<T>** parameters();      // provided parameters in this module
+    virtual int nparameters();              // the number of parameters in the module
 
-    void train() {is_training = true;}
-    void eval() {is_training = false;}
+    void train() {is_training = true;}      // change into the training mode
+    void eval() {is_training = false;}      // change into the evaluation mode
 };
 
 template <class T>

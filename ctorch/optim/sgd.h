@@ -32,13 +32,14 @@ template <class T>
 void SGD<T>::step() {
     for (int i=0; i<this->nparameters; i++) {
         if (this->parameters[i]->requires_grad) {
-
             if (history_grad[i].ndim() == 0) {
                 history_grad[i].zeros_like(this->parameters[i]);
             }
 
             for (int n=0; n<this->parameters[i]->nelement(); n++) {
+                // momentum
                 history_grad[i].index(n) = momentum * history_grad[i].get(n) + (1 - momentum) * this->parameters[i]->grad[n];
+                // update the data of tensor
                 this->parameters[i]->data[n] -= this->lr * history_grad[i].get(n); // this->parameters[i]->grad[n];
             }
         }

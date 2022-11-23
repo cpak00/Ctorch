@@ -8,6 +8,7 @@
 using namespace std;
 
 void list_dir(const char* parent, vector<string> & dirlist) {
+    // list all the directory in this path
     DIR *pDir;
     struct dirent *ptr;
 
@@ -29,6 +30,7 @@ void list_dir(const char* parent, vector<string> & dirlist) {
 }
 
 void list_file(const char* parent, vector<string> & dirlist, const vector<string> & types) {
+    // list all the files in this path
     DIR *pDir;
     struct dirent *ptr;
 

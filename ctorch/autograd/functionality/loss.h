@@ -45,6 +45,7 @@ Tensor_<T> SoftmaxLoss_f<T>::_forward(Tensor_<T>** input, int ninput, bool is_tr
     T sum = 0.;
     T true_ground;
 
+    // calculate the loss: sigma(x) = exp(x)/Sigma(exp(xi))
     for (int i = 0; i < input[0]->size()[0]; i++) {
         T partial_sum = 0.;
         for (int j = 0; j < input[0]->size()[1]; j++) {
@@ -72,6 +73,8 @@ void SoftmaxLoss_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int n
 
     Tensor_<T> children_grad;
     children_grad.zeros_like(children[0]);
+
+    // calculate the grad: sigma(xi) - yi
 
     for (int i=0; i<children[0]->nelement(); i++) {
         children_grad.data[i] = exp(children[0]->data[i]);
@@ -137,6 +140,7 @@ void L2Regular_f<T>::_backward(Tensor_<T> & grad, Tensor_<T>** children, int nch
         Tensor_<T>* tensor = children[i];
         if (tensor->ndim() < 2) continue;
         for (int j=0; j<tensor->nelement(); j++) {
+            // weight decay
             tensor->grad[j] += lambda * tensor->get(j);
         }
     }

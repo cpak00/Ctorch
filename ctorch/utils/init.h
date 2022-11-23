@@ -3,6 +3,7 @@
 
 template <typename T>
 void kaiming_normal_(Tensor_<T>** parameters, int nparameters) {
+    // initial all the parameters by normal(0, 1)/sqrt(fan_in/2)
     for (int i=0; i<nparameters; i++) {
         if (parameters[i]->ndim() > 1) {
             parameters[i]->normal(0., 1.);

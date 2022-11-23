@@ -20,6 +20,7 @@ template <class T>
 Tensor_<T> Autograd<T>::forward(Tensor_<T>** input, int ninput, bool is_training) {
     Tensor_<T> output = this->_forward(input, ninput, is_training);
     for (int i=0; i<ninput; i++) {
+        // the input tensors are not root
         input[i]->is_root = false;
     }
 

@@ -1,7 +1,6 @@
 #ifndef _MATRIX_H_
 #define _MATRIX_H_
 
-
 extern"C"
 {
     #include<cblas.h>
@@ -21,6 +20,7 @@ void gemm(CBLAS_ORDER order, CBLAS_TRANSPOSE Atrans, CBLAS_TRANSPOSE Btrans, int
     }
 }
 
+/*
 template <typename T>
 void transpose(T* data, T* dest, int height, int width) {
     for (int i = 0; i < height; i++) {
@@ -28,11 +28,12 @@ void transpose(T* data, T* dest, int height, int width) {
             dest[i * width + j] = data[j * height + i];
         }
     }
-    
 }
+*/
 
 template <typename T>
 void transpose(Tensor_<T> & data, Tensor_<T> & dest, int sel0, int sel1) {
+    // swap two dimensions in a tensor
 
     int* size0 = data.size();
     int* size1 = new int[dest.ndim()]; // safely deleted
@@ -67,13 +68,12 @@ void transpose(Tensor_<T> & data, Tensor_<T> & dest, int sel0, int sel1) {
 
     delete_s(index1);
     delete_s(index0);
-
     delete_s(size1);
-
 }
 
 template <typename T>
 void transpose(Tensor_<T> & data, Tensor_<T> & dest, int* sel, int nsel) {
+    // tensor transpose
 
     int* size0 = data.size();
     int* size1 = new int[dest.ndim()]; // safely deleted
@@ -85,9 +85,6 @@ void transpose(Tensor_<T> & data, Tensor_<T> & dest, int* sel, int nsel) {
 
     for (int i=0; i<nsize; i++) {
         size1[i] = size0[sel[i]];
-        // if (i == sel0) size1[i] = size0[sel1];
-        // else if (i == sel1) size1[i] = size0[sel0];
-        // else size1[i] = size0[i];
         nelement *= size0[i];
     }
 
@@ -97,19 +94,21 @@ void transpose(Tensor_<T> & data, Tensor_<T> & dest, int* sel, int nsel) {
     int* index1 = new int[nsize]; // safely deleted
 
     for (int i=0; i<nelement; i++) {
+        /*
         int _i = i;
         for (int j=nsize-1; j>=0; j--) {
             index0[j] = _i % size0[j];
             index1[j] = index0[j];
             _i /= size0[j];
         }
+        */
+
+        data.get_index(i, index0);
+        data.get_index(i, index1);
 
         for (int k=0; k<nsel; k++) {
-            index1[k] = index0[sel[k]];
+            index1[k] = index0[sel[k]]; // transpose the index
         }
-
-        // index1[sel0] = index0[sel1];
-        // index1[sel1] = index0[sel0];
 
         dest.index(index1) = data.get(index0);
     }
